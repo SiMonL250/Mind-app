@@ -1,0 +1,25 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  color-scheme: light dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --height-topbar: 19vh;
+
+  --color-font:#969696;
+  --color-font-focus:rgb(63, 63, 63);
+  --color-topBar:rgb(250, 250, 250);
+  --color-border-default: rgb(190, 190, 190);
+  --color-border-foucus:rgb(167, 233, 253);
+
+}
+*{
+  padding: 0;
+  margin: 0;
+  color:var(--color-font);
+}
