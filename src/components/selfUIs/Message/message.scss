@@ -1,0 +1,27 @@
+.normal{
+    background-color: var(--color-messagebkg-normal); 
+    .msg-body{
+        color: var(--color-message-nor-text);
+    }
+}
+
+.success{
+    background-color: var(--color-messagebkg-success);
+    .msg-body{
+        color: var(--color-message-suc-text);
+    }
+}
+
+.error{
+    background-color: var(--color-messagebkg-error);
+    .msg-body{
+        color: var(--color-message-err-text);
+    }
+}
+
+.warning{
+    background-color: var(--color-messagebkg-warning);
+    .msg-body{
+        color: var(--color-message-war-text);
+    }
+}

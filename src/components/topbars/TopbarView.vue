@@ -22,8 +22,6 @@
 			</div>
 		</div>
 		<div class="action-section nav-action">
-
-
 		</div>
 	</div>
 </template>

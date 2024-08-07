@@ -1,5 +1,6 @@
 <template>
 	<div class="page-section">
+		<my-message msg="test" type="warning"> </my-message>
 		<section class="topbar-section">
 			<TopbarView
 				:name="MindFile.mindName"
@@ -18,11 +19,6 @@ import TopbarView from "@/components/topbars/TopbarView.vue";
 import MainView from "@/components/main/MainView.vue";
 import { ref } from "vue";
 import { EnumReconiteCode,mindFileContent } from "../src/interfaces/fileOperate";
-import {
-	insertSiblingNode,
-	findMindNodebyId,
-	MindNode,
-} from "../src/interfaces/MindNodeProperty";
 
 let MindFile = ref<mindFileContent>({
 	reconicode: EnumReconiteCode.MindJson,
@@ -40,8 +36,7 @@ function openFileHandle(file: mindFileContent) {
 	MindFile.value.reconicode = file.reconicode;
 	MindFile.value.mindNode = file.mindNode;
 
-	insertSiblingNode(MindFile.value.mindNode,{data:{id:"lsm",text:"lsm",createdTime:-1},children:Array<MindNode>(0)},"d33vvkxqne00")
-	console.log('findMindNodebyId :>> ', findMindNodebyId(MindFile.value.mindNode,"lsm"));
+
 }
 </script>
 

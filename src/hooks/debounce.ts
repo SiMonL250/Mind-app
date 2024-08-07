@@ -1,4 +1,7 @@
-import { DebounceFunction } from "../types/selfTypes";
+type DebounceFunction<T extends (...args:any[])=>void> = (
+	this: ThisParameterType<T>,
+	...args: Parameters<T>
+) => void;
 
 export function debounce<T extends (...args:any[])=>void>(
 	fn: (...args:any[])=>void,

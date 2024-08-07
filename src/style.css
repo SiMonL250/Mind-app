@@ -13,9 +13,18 @@
 
   --color-font:#969696;
   --color-font-focus:rgb(63, 63, 63);
-  --color-topBar:rgb(250, 250, 250);
+  --color-topBar:rgb(255, 255, 255);
   --color-border-default: rgb(190, 190, 190);
   --color-border-foucus:rgb(167, 233, 253);
+
+  --color-message-suc-text:#95d475;
+  --color-message-err-text:#f89898;
+  --color-message-war-text:#eebe77;
+  --color-message-nor-text:#b1b3b8;
+  --color-messagebkg-normal:#e9e9eb;
+  --color-messagebkg-success:#e1f3d8;
+  --color-messagebkg-error:#fde2e2;
+  --color-messagebkg-warning:#faecd8;
 
 }
 *{
