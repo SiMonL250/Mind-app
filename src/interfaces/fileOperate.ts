@@ -3,16 +3,12 @@ import { MindNode } from "./MindNodeProperty";
 export enum EnumReconiteCode {
 	MindJson = "type-mind-json",
 }
-/* TODO TopbarView.vue:64 [Vue warn]: 
-Component emitted event "create-file" but it is neither 
-declared in the emits option nor as an "onCreate-file" prop.
-修改这个，使其更加合理
-*/
-export enum EnumFileOperation {
-	changeMindName = "change-mindname",
-	openFile = "open-file",
-	createNewFile = "create-file",
-	saveFile = "save-file",
+
+export namespace NameSpaceFileOperation {
+	export const changeMindName = "change-mindname";
+	export const openFile = "open-file";
+	export const createNewFile = "create-file";
+	export const saveFile = "save-file";
 }
 export enum EnumOpenDirectoryMode {
 	read = "read",
@@ -77,10 +73,11 @@ export async function handleOpenFile(): Promise<mindFileContent | null> {
 		const file = await handle[0].getFile();
 		const content = await file.text();
 
-		if(content.length===0) return null;
+		if (content.length === 0) return null;
 
 		const Mind: mindFileContent = JSON.parse(content);
 		let reconicode: EnumReconiteCode = Mind.reconicode;
+		//TODO return fileName To store
 		return reconicode &&
 			Object.values(EnumReconiteCode).includes(reconicode)
 			? Mind
@@ -115,22 +112,26 @@ export async function handleSelectDirectory(): Promise<
 	}
 }
 
-function createEmptyMindFileContent(mindName:string,reconite:EnumReconiteCode):mindFileContent{
+function createEmptyMindFileContent(
+	mindName: string,
+	reconite: EnumReconiteCode
+): mindFileContent {
 	const createdTime = new Date().getTime();
 	return {
-		reconicode:reconite,
-		mindName:mindName,
-		mindNode:{
-			data:{
-				id:'mindroot'+createdTime,
+		reconicode: reconite,
+		mindName: mindName,
+		mindNode: {
+			data: {
+				id: "mindroot" + createdTime,
 				createdTime: createdTime,
-				text:'思维导图'
+				text: "思维导图",
 			},
-			children:[]
-		}
-	}
+			children: [],
+		},
+	};
 }
-//save file  and create file
+//save file  and create file , 
+//TODO 因为要处理两种操作，所以要注意  对fileObject的操作
 export async function handleNewAndSaveFile(
 	fileName: string,
 	fileObject?: mindFileContent
@@ -148,21 +149,23 @@ export async function handleNewAndSaveFile(
 				},
 			],
 		};
-		let fileContent:mindFileContent;
-		if(!fileObject){
-			fileContent = createEmptyMindFileContent(fileName,EnumReconiteCode.MindJson);
-		}else{
+		let fileContent: mindFileContent;
+		if (!fileObject) {
+			fileContent = createEmptyMindFileContent(
+				fileName,
+				EnumReconiteCode.MindJson
+			);
+		} else {
 			fileContent = fileObject;
 		}
 		const fileHandle = await window.showSaveFilePicker(option);
-		
-		const Writable = await fileHandle.createWritable();
 
+		const Writable = await fileHandle.createWritable();
 
 		/*
 			FileSystemFileHandle -> FileSystemWritableStream -> write() ->close stream
 		*/
-		
+
 		Writable.write(JSON.stringify(fileContent));
 
 		Writable.close();

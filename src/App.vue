@@ -37,6 +37,7 @@ const test = function(){
 
 }
 function changeMindNameHandle(newName: string): void {
+	console.log("newName :>> ", newName);
 	MindFile.value.mindName = newName;
 }
 function openFileHandle() {
