@@ -1,42 +1,65 @@
 <template>
 	<div class="page-section">
-		<my-message msg="test" type="warning"> </my-message>
+		<My-msg msg="eeee" :showMsg="false"></My-msg>
 		<section class="topbar-section">
 			<TopbarView
-				:name="MindFile.mindName"
+				v-model="MindFile.mindName"
 				@change-mindname="(newName:string)=>changeMindNameHandle(newName)"
-				@open-file="(file:mindFileContent)=>{openFileHandle(file);}"
+				@open-file="openFileHandle"
+				@save-file="saveFileHandle"
+				@create-file="createFileHandle"
 			/>
 		</section>
 		<section class="main-section">
+			<button @click="test">test</button>
 			<MainView :mindNode="MindFile.mindNode" />
 		</section>
 	</div>
 </template>
 
 <script setup lang="ts">
-import TopbarView from "@/components/topbars/TopbarView.vue";
-import MainView from "@/components/main/MainView.vue";
+import TopbarView from "./components/topbars/TopbarView.vue";
+import MainView from "./components/main/MainView.vue";
 import { ref } from "vue";
-import { EnumReconiteCode,mindFileContent } from "../src/interfaces/fileOperate";
+import { EnumReconiteCode,mindFileContent,handleOpenFile,handleNewAndSaveFile } from "../src/interfaces/fileOperate";
+import { FileStore } from '../src/store/MIndFileStore'
+
+const fileStore = FileStore()
 
 let MindFile = ref<mindFileContent>({
 	reconicode: EnumReconiteCode.MindJson,
 	mindName: "Mind",
-	fileName: "File",
 	mindNode: null,
 });
+const test = function(){
+	fileStore.setFileName('fuck');
+	console.log('fileStore :>> ', fileStore.getFileName);
 
+}
 function changeMindNameHandle(newName: string): void {
 	MindFile.value.mindName = newName;
 }
-function openFileHandle(file: mindFileContent) {
-	MindFile.value.fileName = file.fileName;
-	MindFile.value.mindName = file.mindName;
-	MindFile.value.reconicode = file.reconicode;
-	MindFile.value.mindNode = file.mindNode;
+function openFileHandle() {
+	console.log('open file');
+	handleOpenFile().then(fileContent=>{
+		if(!fileContent){
+			alert('not type')
+		}
+		else{
+			MindFile.value = fileContent;
+			fileStore.setfileContent(MindFile.value)
+			console.log('MindFile :>> ', MindFile.value);
+		}
+		
+		
+	})
 
-
+}
+function saveFileHandle(){
+	handleNewAndSaveFile('');//TODO fileName and fileContent that store in pina store 
+}
+function createFileHandle(){
+	handleNewAndSaveFile('');
 }
 </script>
 

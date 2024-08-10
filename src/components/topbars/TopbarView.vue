@@ -5,12 +5,12 @@
 				<div class="label">Mind Map: </div>
 				<input
 					class="mind-name"
-					v-model="topbar_props.name"
+					v-model="model"
 					id="mindName"
 					spellcheck="false"
 					@focusout="
 						() => {
-							debounce(changeMindNameEmits)(topbar_props.name);
+							debounce(changeMindNameEmits)(model);
 						}
 					"
 				/>
@@ -27,15 +27,19 @@
 </template>
 
 <script setup lang="ts">
-
 import { debounce } from "../../hooks/debounce";
 import {buttonType,buttonProps} from "../../interfaces/ComponentProperty"
-import {handleOpenFile,mindFileContent ,EnumFileOperation} from "../../interfaces/fileOperate"
+import {EnumFileOperation} from "../../interfaces/fileOperate"
+// import { reactive } from "vue";
 
 
-const topbar_props = defineProps({
-	name: String,
-});
+// const topbar_props = defineProps({
+// 	name: String,
+// });
+
+const model = defineModel()
+
+// const mindName = reactive({name:topbar_props.name})
 const buttonsProps:buttonProps[] =[
 	{classList:["file-operate-btn"],innerText:"New",type:buttonType.createNewFile,eventClickHandle:newFileBtnClick},
 	{classList:["file-operate-btn"],innerText:"open",type:buttonType.openFile,eventClickHandle:selectFileClick},
@@ -46,32 +50,27 @@ const buttonsProps:buttonProps[] =[
 
 const Emits = defineEmits<{
 	(e: EnumFileOperation.changeMindName, title: string): void;
-	(e: EnumFileOperation.openFile,mindNode:mindFileContent ):void;
+	(e: EnumFileOperation.openFile,):void;
+	(e: EnumFileOperation.createNewFile,):void;
+	(e: EnumFileOperation.saveFile,):void;
+
 }>();
 
 function changeMindNameEmits(newName: string): void {
+	console.log('newName :>> ', newName);
 	Emits(EnumFileOperation.changeMindName, newName);
 }
 function newFileBtnClick():void {
-
+	Emits(EnumFileOperation.createNewFile);
 }
 function selectFileClick():void{
-	handleOpenFile().then(Mind=>{
-		
-		if(Mind!=null){
-			//traverseMindNode(Mind?.mindNode as NodeProperty);
-			Emits(EnumFileOperation.openFile,Mind);
-		}
-		else{
-			console.log("null file or not contain our type ");
-		}
-	})
+	Emits(EnumFileOperation.openFile);
 }
 function saveFileClick():void{
-
+	Emits(EnumFileOperation.saveFile);
 }
 function shortcutsClick():void{
-
+	console.log('show shortcut :>> ');
 }
 </script>
 
@@ -99,7 +98,7 @@ function shortcutsClick():void{
 				width: fit-content;
 				max-width: 75%;
 				font-size: inherit;
-				margin-top: 4px;
+				margin-top: 2px;
 				border: 0;
 				outline: none;
 				color: var(--color-font);

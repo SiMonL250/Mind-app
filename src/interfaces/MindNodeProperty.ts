@@ -1,14 +1,14 @@
-enum PriorytyLevel{
+export enum PriorytyLevel{
     highest=0,
     higher,
     medium,
     lower,
     lowest
 }
-type NodeId = string
+export type NodeIdType = string
 
-type MindNodeData = {
-    id:NodeId,
+export interface MindNodeData {
+    id:NodeIdType,
     createdTime:number,//timeStamp
     text:string,
     priority?:PriorytyLevel,//value smaller, priority higher
@@ -30,7 +30,7 @@ export function traverseMindNode(node:MindNode):void{
     }
 }
 
-export function findMindNodebyId(node:MindNode,id:NodeId):MindNode|null{
+export function findMindNodebyId(node:MindNode,id:NodeIdType):MindNode|null{
     if(!node) return null; 
     if(node.data &&  node.data.id === id){
         return node;
@@ -43,7 +43,7 @@ export function findMindNodebyId(node:MindNode,id:NodeId):MindNode|null{
 }
 
 //插入子节点
-export function insertChildNode(tree:MindNode,child:MindNode,fatherId:NodeId){
+export function insertChildNode(tree:MindNode,child:MindNode,fatherId:NodeIdType){
     if(!tree || !tree.children) return;
 
     for(let node of tree.children){
@@ -56,7 +56,7 @@ export function insertChildNode(tree:MindNode,child:MindNode,fatherId:NodeId){
 }
 
 //插入父节点
-export function insertFatherNode(tree:MindNode,fatherNode:MindNode,childId:NodeId){
+export function insertFatherNode(tree:MindNode,fatherNode:MindNode,childId:NodeIdType){
     if(!tree || !tree.children){
         return;
     }
@@ -71,7 +71,7 @@ export function insertFatherNode(tree:MindNode,fatherNode:MindNode,childId:NodeI
 }
 
 //插入同级
-export function insertSiblingNode(tree:MindNode,siblingNode:MindNode,targetId:NodeId){
+export function insertSiblingNode(tree:MindNode,siblingNode:MindNode,targetId:NodeIdType){
     if(!tree || !tree.children) return;
     for(let node of tree.children){
         if(node?.data.id === targetId){

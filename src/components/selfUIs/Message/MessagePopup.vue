@@ -1,21 +1,20 @@
 <template>
-	<div :class="classList">
-		<div class="msg-body">{{ message.msg + message.type}}</div>
+	<div ref="messageRef" :class="messageAttr.classList" v-show="showMsg?showMsg:false">
+		<div class="msg-body">{{ messageAttr.text + messageAttr.classList[1] }}</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, onMounted, reactive } from "vue";
-import {msgTypes} from "./message"
+import { onBeforeMount, onMounted,ref ,reactive} from "vue";
+import {msgProperty, msgTypes} from "./message"
 
-const message = defineProps<{ msg: string,type?:string}>();
-const classList = reactive(['message-container','normal'])
-
+const message = defineProps<{ msg: string,type?:string,showMsg?:boolean}>();
+const messageAttr = reactive<msgProperty>({text:"",classList:["message-container","normal"],remainTime:3000,positionX:0,positionY:0});
+const messageRef = ref<null|HTMLElement>(null);
 onBeforeMount(()=>{
-
 	if( message.type ){
 		if(msgTypes.includes(message.type)){
-			classList[1] = message.type;
+			messageAttr.classList[1] = message.type;
 		}
 		else{
 			console.warn("message type error");
@@ -24,15 +23,20 @@ onBeforeMount(()=>{
 
 })
 onMounted(() => {
-	console.log("message :>> ", message);
+	setPosition();
 
 });
+//TODO  消息队列，计算位置, 动态加载 
+function setPosition() {
+	if(!messageRef) return;
+
+}
 </script>
 
 <style scoped lang="scss">
 @import url("./message.scss");
-$msgContainerHeight:32px;
-$shadowColor:#929292;
+$msgContainerHeight: 32px;
+$shadowColor: #929292;
 .message-container {
 	z-index: 99999;
 	//position: fixed;
@@ -42,13 +46,12 @@ $shadowColor:#929292;
 	margin-top: 10px; //TODO margin 和 位置得计算出来
 	height: $msgContainerHeight;
 	text-align: center;
-	display: block;
-	position: fixed;
-	//border: 1px solid var(--color-border-default);
-    padding: 4px 18px;
-    font-size: 24px;
+	cursor: pointer;
+	position:absolute;
+	padding: 4px 18px;
+	font-size: 24px;
 	box-shadow: 1px 1px 2px $shadowColor;
-	.msg-body{
+	.msg-body {
 		text-shadow: 0 0 1px $shadowColor;
 		line-height: $msgContainerHeight;
 		font-weight: 400;
