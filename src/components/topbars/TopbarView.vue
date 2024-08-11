@@ -46,7 +46,7 @@ const model = defineModel();
 const buttonsProps: buttonProps[] = [
 	{
 		classList: ["file-operate-btn"],
-		innerText: "New",
+		innerText: "new",
 		type: buttonType.createNewFile,
 		eventClickHandle: newFileBtnClick,
 	},

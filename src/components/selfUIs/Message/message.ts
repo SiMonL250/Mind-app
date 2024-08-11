@@ -7,3 +7,5 @@ export interface msgProperty{
     remainTime:number,
     classList:string[],
 }
+
+

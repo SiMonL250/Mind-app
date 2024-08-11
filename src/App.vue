@@ -11,7 +11,6 @@
 			/>
 		</section>
 		<section class="main-section">
-			<button @click="test">test</button>
 			<MainView :mindNode="MindFile.mindNode" />
 		</section>
 	</div>
@@ -23,7 +22,10 @@ import MainView from "./components/main/MainView.vue";
 import { ref } from "vue";
 import { EnumReconiteCode,mindFileContent,handleOpenFile,handleNewAndSaveFile } from "../src/interfaces/fileOperate";
 import { FileStore } from '../src/store/MIndFileStore'
+import { onMounted } from "vue";
+import {session,mindSessionKey} from '../src/hooks/sessionStorage.ts'
 
+interface sessionStoredType {fileName:string,fileContent:mindFileContent};
 const fileStore = FileStore()
 
 let MindFile = ref<mindFileContent>({
@@ -31,25 +33,22 @@ let MindFile = ref<mindFileContent>({
 	mindName: "Mind",
 	mindNode: null,
 });
-const test = function(){
-	fileStore.setFileName('fuck');
-	console.log('fileStore :>> ', fileStore.getFileName);
-
-}
 function changeMindNameHandle(newName: string): void {
 	console.log("newName :>> ", newName);
 	MindFile.value.mindName = newName;
 }
 function openFileHandle() {
 	console.log('open file');
-	handleOpenFile().then(fileContent=>{
-		if(!fileContent){
-			alert('not type')
+	handleOpenFile().then(fileRes=>{
+		if(!fileRes){
+			console.error('what happened? ', fileRes);
 		}
 		else{
-			MindFile.value = fileContent;
-			fileStore.setfileContent(MindFile.value)
-			console.log('MindFile :>> ', MindFile.value);
+			let fileName = fileRes.fileName;
+			MindFile.value = fileRes.mind;
+			fileStore.setFileName(fileName);
+			fileStore.setfileContent(MindFile.value);
+			console.log('MindFile :>> ',fileName);
 		}
 		
 		
@@ -57,11 +56,17 @@ function openFileHandle() {
 
 }
 function saveFileHandle(){
-	handleNewAndSaveFile('');//TODO fileName and fileContent that store in pina store 
+	const name:string = session.get<sessionStoredType>(mindSessionKey).fileName;
+	console.log('MindFile.value :>> ', MindFile.value);
+	handleNewAndSaveFile(name,MindFile.value);
 }
-function createFileHandle(){
-	handleNewAndSaveFile('');
+function createFileHandle(){ //TODO
+	handleNewAndSaveFile();
 }
+onMounted(()=>{
+	let sessionContent:sessionStoredType =  session.get(mindSessionKey);
+	MindFile.value = sessionContent.fileContent;
+})
 </script>
 
 <style lang="scss" scoped>

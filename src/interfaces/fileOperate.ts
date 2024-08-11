@@ -51,16 +51,15 @@ interface fileSaveOptions {
 	}[];
 }
 //this function return Node property object, then topbar emit this object
-export async function handleOpenFile(): Promise<mindFileContent | null> {
+export async function handleOpenFile(): Promise<{mind:mindFileContent ,fileName:string}| null> {
 	try {
 		// 定义文件选择器的选项
 		const options: filePickerOptions = {
 			types: [
 				{
-					description: "JSON/TXT files",
+					description: "mindfiletype",
 					accept: {
-						"application/json": [".json"],
-						"text/txt": [".txt"],
+						"application/lsm": [".lsm"],
 					},
 				},
 			],
@@ -71,16 +70,18 @@ export async function handleOpenFile(): Promise<mindFileContent | null> {
 		const handle = await window.showOpenFilePicker(options);
 		// 获取文件句柄数组
 		const file = await handle[0].getFile();
+		console.log('file :>> ', file);
 		const content = await file.text();
+		console.log('content :>> ', content);
 
 		if (content.length === 0) return null;
 
 		const Mind: mindFileContent = JSON.parse(content);
 		let reconicode: EnumReconiteCode = Mind.reconicode;
-		//TODO return fileName To store
+
 		return reconicode &&
 			Object.values(EnumReconiteCode).includes(reconicode)
-			? Mind
+			? {mind:Mind,fileName:file.name}
 			: null;
 	} catch (error) {
 		console.error(error);
@@ -132,19 +133,21 @@ function createEmptyMindFileContent(
 }
 //save file  and create file , 
 //TODO 因为要处理两种操作，所以要注意  对fileObject的操作
+//save操作fileObject不能为空
 export async function handleNewAndSaveFile(
-	fileName: string,
+	fileName?:string,
 	fileObject?: mindFileContent
 ): Promise<mindFileContent | null> {
+	let date = new Date();
+	let MindName = 'Mind'+date.getTime();
 	try {
 		const option: fileSaveOptions = {
-			suggestedName: fileName,
+			suggestedName: fileName?fileName:MindName,
 			types: [
 				{
 					description: "",
 					accept: {
-						"application/json": [".json"],
-						"text/txt": [".txt"],
+						"application/lsm": [".lsm"],
 					},
 				},
 			],
@@ -152,7 +155,7 @@ export async function handleNewAndSaveFile(
 		let fileContent: mindFileContent;
 		if (!fileObject) {
 			fileContent = createEmptyMindFileContent(
-				fileName,
+				MindName,
 				EnumReconiteCode.MindJson
 			);
 		} else {
@@ -167,8 +170,9 @@ export async function handleNewAndSaveFile(
 		*/
 
 		Writable.write(JSON.stringify(fileContent));
-
-		Writable.close();
+// TODO close to slow ,可以加个加载动画
+		await Writable.close();
+		return fileContent;
 	} catch (e) {
 		console.error(e);
 		return null;

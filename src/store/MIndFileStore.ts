@@ -4,7 +4,7 @@ import { mindFileContent } from '../interfaces/fileOperate';
 export const FileStore = defineStore('mind-file-store',{
     state:()=>{
         return {
-            fileName:"111" as string,
+            fileName:"" as string,
             fileContent: null as mindFileContent | null,
         }
     },
@@ -17,13 +17,17 @@ export const FileStore = defineStore('mind-file-store',{
         }
     },
     actions:{
-        setFileName(newFileName:string){
+        setFileName(newFileName:string):void{
             this.fileName = newFileName;
         },
-        setfileContent(newFileContent:mindFileContent){
-            
+        setfileContent(newFileContent:mindFileContent):void{
             this.fileContent = {...newFileContent}
         }
+    },
+    persist:{
+        enabled:true,
+        
     }
+
 })
 
