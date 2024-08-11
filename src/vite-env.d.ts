@@ -33,3 +33,4 @@ declare module 'pinia' {
         persist?: PersistOptions;
     }
 }
+

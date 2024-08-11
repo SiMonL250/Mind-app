@@ -1,6 +1,5 @@
 <template>
 	<div class="page-section">
-		<My-msg msg="eeee" :showMsg="false"></My-msg>
 		<section class="topbar-section">
 			<TopbarView
 				v-model="MindFile.mindName"
@@ -11,6 +10,7 @@
 			/>
 		</section>
 		<section class="main-section">
+			<button @click="test"> test</button>
 			<MainView :mindNode="MindFile.mindNode" />
 		</section>
 	</div>
@@ -19,11 +19,13 @@
 <script setup lang="ts">
 import TopbarView from "./components/topbars/TopbarView.vue";
 import MainView from "./components/main/MainView.vue";
-import { ref } from "vue";
+import { ref ,getCurrentInstance,onMounted} from "vue";
 import { EnumReconiteCode,mindFileContent,handleOpenFile,handleNewAndSaveFile } from "../src/interfaces/fileOperate";
 import { FileStore } from '../src/store/MIndFileStore'
-import { onMounted } from "vue";
 import {session,mindSessionKey} from '../src/hooks/sessionStorage.ts'
+
+
+const instance = getCurrentInstance();
 
 interface sessionStoredType {fileName:string,fileContent:mindFileContent};
 const fileStore = FileStore()
@@ -33,6 +35,12 @@ let MindFile = ref<mindFileContent>({
 	mindName: "Mind",
 	mindNode: null,
 });
+
+
+
+const test = function(){
+	instance.proxy.$message({text:'sssss',type:'error'},2000);
+} 
 function changeMindNameHandle(newName: string): void {
 	console.log("newName :>> ", newName);
 	MindFile.value.mindName = newName;
@@ -60,12 +68,14 @@ function saveFileHandle(){
 	console.log('MindFile.value :>> ', MindFile.value);
 	handleNewAndSaveFile(name,MindFile.value);
 }
-function createFileHandle(){ //TODO
+function createFileHandle(){ 
 	handleNewAndSaveFile();
 }
 onMounted(()=>{
+	
 	let sessionContent:sessionStoredType =  session.get(mindSessionKey);
-	MindFile.value = sessionContent.fileContent;
+	if(sessionContent)
+		MindFile.value = sessionContent.fileContent;
 })
 </script>
 

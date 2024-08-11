@@ -2,7 +2,7 @@
 	<div class="topbar">
 		<div class="action-section file-section">
 			<div class="name-area">
-				<div class="label">Mind Map:</div>
+				<div class="label">Mind:</div>
 				<input
 					class="mind-name"
 					v-model="model"

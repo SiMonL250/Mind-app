@@ -7,7 +7,7 @@ export function debounce<T extends (...args:any[])=>void>(
 	fn: (...args:any[])=>void,
 	delay?: number
 ): DebounceFunction<T> {
-	let timer: NodeJS.Timeout | null = null;
+	let timer = null;
 	let ms = delay?delay:300;
 	const _debounce:DebounceFunction<T> = (...args: any[]): void => {
 		if (timer !== null) {
