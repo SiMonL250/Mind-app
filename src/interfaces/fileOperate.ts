@@ -132,8 +132,7 @@ function createEmptyMindFileContent(
 	};
 }
 //save file  and create file , 
-//TODO 因为要处理两种操作，所以要注意  对fileObject的操作
-//save操作fileObject不能为空
+//save操作fileObject和fileName不能为空
 export async function handleNewAndSaveFile(
 	fileName?:string,
 	fileObject?: mindFileContent
@@ -170,7 +169,7 @@ export async function handleNewAndSaveFile(
 		*/
 
 		Writable.write(JSON.stringify(fileContent));
-// TODO close to slow ,可以加个加载动画
+// TODO stream close too slow ,可以加个加载动画
 		await Writable.close();
 		return fileContent;
 	} catch (e) {

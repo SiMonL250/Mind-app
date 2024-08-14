@@ -11,6 +11,7 @@
 		</section>
 		<section class="main-section">
 			<button @click="test"> test</button>
+			<button @click="test1"> test1</button>
 			<MainView :mindNode="MindFile.mindNode" />
 		</section>
 	</div>
@@ -21,7 +22,7 @@ import TopbarView from "./components/topbars/TopbarView.vue";
 import MainView from "./components/main/MainView.vue";
 import { ref ,getCurrentInstance,onMounted} from "vue";
 import { EnumReconiteCode,mindFileContent,handleOpenFile,handleNewAndSaveFile } from "../src/interfaces/fileOperate";
-import { FileStore } from '../src/store/MIndFileStore'
+import { FileStore } from '../src/store/MindFileStore'
 import {session,mindSessionKey} from '../src/hooks/sessionStorage.ts'
 
 
@@ -40,6 +41,9 @@ let MindFile = ref<mindFileContent>({
 
 const test = function(){
 	instance.proxy.$message({text:'sssss',type:'error'},2000);
+} 
+const test1 = function(){
+	instance.proxy.$message({text:'sssss',type:'success'},2000);
 } 
 function changeMindNameHandle(newName: string): void {
 	console.log("newName :>> ", newName);
@@ -72,7 +76,6 @@ function createFileHandle(){
 	handleNewAndSaveFile();
 }
 onMounted(()=>{
-	
 	let sessionContent:sessionStoredType =  session.get(mindSessionKey);
 	if(sessionContent)
 		MindFile.value = sessionContent.fileContent;
