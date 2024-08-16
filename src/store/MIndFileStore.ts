@@ -26,7 +26,9 @@ export const FileStore = defineStore('mind-file-store',{
     },
     persist:{
         enabled:true,
-        
+        strategies:[{
+            storage:localStorage
+        }]
     }
 
 })

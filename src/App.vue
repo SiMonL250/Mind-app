@@ -11,7 +11,6 @@
 		</section>
 		<section class="main-section">
 			<button @click="test"> test</button>
-			<button @click="test1"> test1</button>
 			<MainView :mindNode="MindFile.mindNode" />
 		</section>
 	</div>
@@ -23,7 +22,7 @@ import MainView from "./components/main/MainView.vue";
 import { ref ,getCurrentInstance,onMounted} from "vue";
 import { EnumReconiteCode,mindFileContent,handleOpenFile,handleNewAndSaveFile } from "../src/interfaces/fileOperate";
 import { FileStore } from '../src/store/MindFileStore'
-import {session,mindSessionKey} from '../src/hooks/sessionStorage.ts'
+import {local,mindLocalKey} from '../src/hooks/localStorage.ts'
 
 
 const instance = getCurrentInstance();
@@ -37,13 +36,13 @@ let MindFile = ref<mindFileContent>({
 	mindNode: null,
 });
 
+function showMessage(text:string,type?:string,remainMS?:number){
+	instance.proxy.$message(text,type,remainMS);
+}
 
 
 const test = function(){
-	instance.proxy.$message({text:'sssss',type:'error'},2000);
-} 
-const test1 = function(){
-	instance.proxy.$message({text:'sssss',type:'success'},2000);
+	showMessage('fuck')
 } 
 function changeMindNameHandle(newName: string): void {
 	console.log("newName :>> ", newName);
@@ -68,7 +67,7 @@ function openFileHandle() {
 
 }
 function saveFileHandle(){
-	const name:string = session.get<sessionStoredType>(mindSessionKey).fileName;
+	const name:string = local.get<sessionStoredType>(mindLocalKey).fileName;
 	console.log('MindFile.value :>> ', MindFile.value);
 	handleNewAndSaveFile(name,MindFile.value);
 }
@@ -76,7 +75,7 @@ function createFileHandle(){
 	handleNewAndSaveFile();
 }
 onMounted(()=>{
-	let sessionContent:sessionStoredType =  session.get(mindSessionKey);
+	let sessionContent:sessionStoredType =  local.get(mindLocalKey);
 	if(sessionContent)
 		MindFile.value = sessionContent.fileContent;
 })

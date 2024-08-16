@@ -26,7 +26,9 @@
 				</div>
 			</div>
 		</div>
-		<div class="action-section nav-action"></div>
+		<div class="action-section nav-action">
+			<!-- TODO 🔪图操作 -->
+		</div>
 	</div>
 </template>
 
@@ -46,25 +48,25 @@ const model = defineModel();
 const buttonsProps: buttonProps[] = [
 	{
 		classList: ["file-operate-btn"],
-		innerText: "new",
+		innerText: "new🎁",
 		type: buttonType.createNewFile,
 		eventClickHandle: newFileBtnClick,
 	},
 	{
 		classList: ["file-operate-btn"],
-		innerText: "open",
+		innerText: "open🤤",
 		type: buttonType.openFile,
 		eventClickHandle: selectFileClick,
 	},
 	{
 		classList: ["file-operate-btn"],
-		innerText: "save",
+		innerText: "save👻",
 		type: buttonType.saveFile,
 		eventClickHandle: saveFileClick,
 	},
 	{
 		classList: ["file-operate-btn"],
-		innerText: "shortcuts",
+		innerText: "shortcut🔪",
 		type: buttonType.createNewFile,
 		eventClickHandle: shortcutsClick,
 	},

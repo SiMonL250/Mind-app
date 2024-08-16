@@ -25,3 +25,24 @@
         color: var(--color-message-war-text);
     }
 }
+
+.my-message{
+    position: absolute;
+    left: 50%;
+    top:0px;
+}
+
+.message-container{
+    animation-name: showup;
+    animation-duration: .3s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes showup {
+    from{
+        top:-42px;
+    }
+    to{
+        top:10px;
+    }
+}

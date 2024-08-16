@@ -7,8 +7,8 @@
 <script setup lang="ts">
 import { StyleValue } from "vue";
 import { onBeforeMount, onMounted,ref } from "vue";
+import {msgTypes} from './message'
 
-const msgTypes:string[]  = ["success", "error", "normal", "warning"];
 
 
 const message = defineProps<{ text: string,type?:string,style?:StyleValue}>();
@@ -42,8 +42,9 @@ $shadowColor: #929292;
 	//position: fixed;
 	border-radius: 8px;
 	width: fit-content;
+	height: 32px;
 	min-width: 100px;
-	margin-top: 10px; //TODO margin 和 位置得计算出来
+	margin-top: 10px; 
 	text-align: center;
 	cursor: pointer;
 	position:absolute !important;
