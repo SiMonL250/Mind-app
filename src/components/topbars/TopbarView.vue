@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { debounce } from "../../hooks/debounce";
 import { buttonType, buttonProps } from "../../interfaces/ComponentProperty";
-import { NameSpaceFileOperation } from "../../interfaces/fileOperate";
+import { NameSpaceFileOperation } from "../../hooks/fileOperate";
 // import { reactive } from "vue";
 
 // const topbar_props = defineProps({

@@ -1,4 +1,4 @@
-import { MindNode } from "./MindNodeProperty";
+import { MindNode } from "../interfaces/MindNodeProperty";
 
 export enum EnumReconiteCode {
 	MindJson = "type-mind-json",
@@ -70,9 +70,9 @@ export async function handleOpenFile(): Promise<{mind:mindFileContent ,fileName:
 		const handle = await window.showOpenFilePicker(options);
 		// 获取文件句柄数组
 		const file = await handle[0].getFile();
-		console.log('file :>> ', file);
+		//console.log('file :>> ', file);
 		const content = await file.text();
-		console.log('content :>> ', content);
+		//console.log('content :>> ', content);
 
 		if (content.length === 0) return null;
 
@@ -84,9 +84,9 @@ export async function handleOpenFile(): Promise<{mind:mindFileContent ,fileName:
 			? {mind:Mind,fileName:file.name}
 			: null;
 	} catch (error) {
-		console.error(error);
-
-		return null;
+		//console.error(error);
+		throw error;
+		
 	}
 }
 
@@ -109,7 +109,7 @@ export async function handleSelectDirectory(): Promise<
 
 		return list;
 	} catch (error) {
-		return null;
+		throw error;
 	}
 }
 
@@ -172,8 +172,8 @@ export async function handleNewAndSaveFile(
 // TODO stream close too slow ,可以加个加载动画
 		await Writable.close();
 		return fileContent;
-	} catch (e) {
-		console.error(e);
-		return null;
+	} catch (error) {
+		//console.error(e);
+		throw error;
 	}
 }
