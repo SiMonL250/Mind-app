@@ -10,7 +10,7 @@
 			/>
 		</section>
 		<section class="main-section">
-			<button @click="test"> test</button>
+			
 			<MainView :mindNode="MindFile.mindNode" />
 		</section>
 	</div>
@@ -20,7 +20,7 @@
 import TopbarView from "./components/topbars/TopbarView.vue";
 import MainView from "./components/main/MainView.vue";
 import { ref ,getCurrentInstance,onMounted} from "vue";
-import { EnumReconiteCode,mindFileContent,handleOpenFile,handleNewAndSaveFile } from "../src/interfaces/fileOperate";
+import { EnumReconiteCode,mindFileContent,handleOpenFile,handleNewAndSaveFile } from "../src/hooks/fileOperate";
 import { FileStore } from '../src/store/MindFileStore'
 import {local,mindLocalKey} from '../src/hooks/localStorage.ts'
 
@@ -42,14 +42,14 @@ function showMessage(text:string,type?:string,remainMS?:number){
 
 
 const test = function(){
-	showMessage('fuck')
+	showMessage('fuck');
 } 
 function changeMindNameHandle(newName: string): void {
 	console.log("newName :>> ", newName);
 	MindFile.value.mindName = newName;
 }
 function openFileHandle() {
-	console.log('open file');
+	test()
 	handleOpenFile().then(fileRes=>{
 		if(!fileRes){
 			console.error('what happened? ', fileRes);
@@ -92,14 +92,13 @@ onMounted(()=>{
 		background-color: var(--color-topBar);
 		padding: 9px 15px;
 		box-sizing: border-box;
-		border-bottom: 1px solid var(--color-border-default);
 	}
 	.main-section {
 		width: 100%;
 		height: calc(100% - var(--height-topbar));
-		padding: 5px 10px 5px 10px;
+		padding: 5px 18px ;
 		box-sizing: border-box;
-		overflow-y: scroll;
+		overflow-y: hidden;
 	}
 }
 </style>
