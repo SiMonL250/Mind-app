@@ -1,14 +1,31 @@
 import { MindNode } from "../interfaces/MindNodeProperty";
+/*
+	file operate and node operates 
 
-export enum EnumReconiteCode {
-	MindJson = "type-mind-json",
-}
+*/
 
+/*NAMESPACE START  */ 
 export namespace NameSpaceFileOperation {
 	export const changeMindName = "change-mindname";
 	export const openFile = "open-file";
 	export const createNewFile = "create-file";
 	export const saveFile = "save-file";
+}
+export namespace NameSpaceNodeOperate{
+	export const NodeAction= "node-action";
+
+    export const redoAndaUndo = "redo-and-undo";
+    export const insertNode = "insert-node";
+    export const moveUp = "move-node";
+    export const editText = "edit-text";
+    export const deleteNode = "delete-node";
+    export const setPriority = "set-priority";
+    
+}
+/*NAMESPACE END  */ 
+/*ENUMS START  */ 
+export enum EnumReconiteCode {
+	MindJson = "type-mind-json",
 }
 export enum EnumOpenDirectoryMode {
 	read = "read",
@@ -22,7 +39,12 @@ export enum EnumDirectoryWellknow {
 	pictures = "pictures",
 	videos = "videos",
 }
-
+/*ENUMS  END  */
+/*INTERFACE START  */ 
+export interface interfaceNodeAction {
+	action:string,
+	val?:any
+}
 export interface mindFileContent {
 	reconicode: EnumReconiteCode;
 	mindName: string;
@@ -50,6 +72,9 @@ interface fileSaveOptions {
 		accept: { [key: string]: string[] };
 	}[];
 }
+/*INTERFACE  END  */
+
+
 //this function return Node property object, then topbar emit this object
 export async function handleOpenFile(): Promise<{mind:mindFileContent ,fileName:string}| null> {
 	try {

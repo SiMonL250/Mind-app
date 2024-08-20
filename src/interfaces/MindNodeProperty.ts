@@ -1,9 +1,13 @@
+/* 
+    mind node tree struct and tree functions
+*/
+
 export enum PriorytyLevel{
     highest=0,
     higher,
     medium,
     lower,
-    lowest
+    lowest,
 }
 export type NodeIdType = string
 

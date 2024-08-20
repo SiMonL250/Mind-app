@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia';
-import { mindFileContent } from '../interfaces/fileOperate';
+import { mindFileContent } from '../hooks/operate';
 
 export const FileStore = defineStore('mind-file-store',{
     state:()=>{

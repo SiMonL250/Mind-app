@@ -26,32 +26,68 @@
 				</div>
 			</div>
 		</div>
-		<div class="action-section nav-action">
-			<div class="nav-items redo-and-undo">
-				<div class="undo items-btn">👉</div>
-				<div class="redo items-btn">👈</div>
+		<div class="action-section nav-action" @click="(e)=>NodeAction(e)">
+			<div class="nav-items redo-and-undo" >
+				<button :disabled="props.redoDisable" class="undo items-btn">
+					👉
+				</button>
+				<button :disabled="props.redoDisable" class="redo items-btn">
+					👈
+				</button>
 			</div>
-			<div class="nav-items insert-node">
-				<div class="insert-child items-btn">👶child</div>
-				<div class="insert-father items-btn">👨father</div>
-				<div class="insert-sibling items-btn">🧑sibling</div>
+			<div class="nav-items insert-node" >
+				<button
+					:disabled="props.operateDisable"
+					class="insert-child items-btn"
+				>
+					👶child
+				</button>
+				<button
+					:disabled="props.operateDisable"
+					class="insert-father items-btn"
+				>
+					👨father
+				</button>
+				<button
+					:disabled="props.operateDisable"
+					class="insert-sibling items-btn"
+				>
+					🧑sibling
+				</button>
 			</div>
 			<div class="nav-items node-operate">
-				<div class="node-operate-items">
-					<div class="items-btn">👆up</div>
-					<div class="items-btn">👇down</div>
+				<div class="node-operate-items" >
+					<button :disabled="props.operateDisable" class="items-btn">
+						👆up
+					</button>
+					<button :disabled="props.operateDisable" class="items-btn">
+						👇down
+					</button>
 				</div>
 				<div class="node-operate-items">
-					<div class="items-btn">✍text</div>
-					<div class="items-btn">❌delete</div>
+					<button :disabled="props.operateDisable"  class="items-btn">
+						✍text
+					</button>
+					<button :disabled="props.operateDisable" class="items-btn">
+						❌delete
+					</button>
 				</div>
 				<div class="node-operate-items priority">
-					<div class="priority-item">0</div>
-					<div class="priority-item">1</div>
-					<div class="priority-item">2</div>
-					<div class="priority-item">3</div>
-					<div class="priority-item">4</div>
-					<div class="priority-item">#</div>
+					<button
+						:class="`items-btn ${key}`"
+						v-for="[key, val] of (enumValues as Array<[string,string]>)"
+						:key="key"
+						:disabled="props.operateDisable"
+					>
+						{{ val }}
+					</button>
+					<button
+						class="items-btn"
+						
+						:disabled="props.operateDisable"
+					>
+						#
+					</button>
 				</div>
 			</div>
 		</div>
@@ -61,15 +97,34 @@
 <script setup lang="ts">
 import { debounce } from "../../hooks/debounce";
 import { buttonType, buttonProps } from "../../interfaces/ComponentProperty";
-import { NameSpaceFileOperation } from "../../hooks/fileOperate";
-// import { reactive } from "vue";
+import { PriorytyLevel } from "../../interfaces/MindNodeProperty";
+import { NameSpaceFileOperation,NameSpaceNodeOperate,interfaceNodeAction } from "../../hooks/operate";
+import { ref } from "vue";
 
-// const topbar_props = defineProps({
-// 	name: String,
-// });
-
+const enumValues = ref(
+	Object.entries(PriorytyLevel).slice(
+		Object.entries(PriorytyLevel).length / 2
+	)
+);
 const model = defineModel();
+const props = defineProps({
+	redoDisable: {
+		type: Boolean,
+		default: false,
+	},
+	operateDisable: {
+		type: Boolean,
+		default: false,
+	},
+});
+const Emits = defineEmits([
+	NameSpaceFileOperation.changeMindName,
+	NameSpaceFileOperation.openFile,
+	NameSpaceFileOperation.createNewFile,
+	NameSpaceFileOperation.saveFile,
 
+	NameSpaceNodeOperate.NodeAction,
+]);
 // const mindName = reactive({name:topbar_props.name})
 const buttonsProps: buttonProps[] = [
 	{
@@ -98,12 +153,15 @@ const buttonsProps: buttonProps[] = [
 	},
 ];
 
-const Emits = defineEmits([
-	NameSpaceFileOperation.changeMindName,
-	NameSpaceFileOperation.openFile,
-	NameSpaceFileOperation.createNewFile,
-	NameSpaceFileOperation.saveFile,
-]);
+
+function NodeAction(e:Event,val?:any){
+	if((e.target) instanceof Element && (e.target as HTMLElement).tagName !== 'BUTTON') return ;
+	console.dir(e.target);
+	//TODO 可以把所有的操作放在这里写，以{action:string,value?:any}的形式Emits
+	//根据 e.target 判断 action 和 val
+	let toEmit:interfaceNodeAction = {action:'fuck',val:val}
+	Emits(NameSpaceNodeOperate.NodeAction,toEmit);
+}
 
 function changeMindNameEmits(newName: string): void {
 	Emits(NameSpaceFileOperation.changeMindName, newName);
@@ -205,10 +263,20 @@ $nodeOpWidth: calc(100% - 64px - 150px);
 				display: inline-flex;
 				align-items: flex-end;
 				justify-content: center;
-				font-size: 14px;
+				font-size: 15px;
+				border: none;
+				background-color: var(--color-topBar);
 				&:hover {
 					//background-color: var(--color-border-insection);
 					text-shadow: 1px 1px 2px var(--color-font-focus);
+					background-color: aliceblue;
+				}
+				&[disabled] {
+					cursor: not-allowed;
+					&:hover {
+						background-color: var(--color-topBar);
+						text-shadow: none;
+					}
 				}
 			}
 		}
@@ -250,7 +318,7 @@ $nodeOpWidth: calc(100% - 64px - 150px);
 			width: $nodeOpWidth;
 			border-right: none;
 			display: grid;
-			grid-template-columns: 1fr 1fr 3fr 4fr;
+			grid-template-columns: 1fr 1fr 2fr 4fr;
 			padding-left: 0;
 			.node-operate-items {
 				border-right: 1px solid var(--color-border-insection);
@@ -261,9 +329,19 @@ $nodeOpWidth: calc(100% - 64px - 150px);
 					border-bottom: 1px solid var(--color-border-insection);
 				}
 			}
-			.priority{
+			.priority {
 				display: grid;
 				grid-template-columns: 1fr 1fr 1fr;
+				.medium,
+				.higher {
+					border-bottom: 1px solid var(--color-border-insection);
+				}
+				.highest,
+				.higher,
+				.lower,
+				.lowest {
+					border-right: 1px solid var(--color-border-insection);
+				}
 			}
 		}
 	}
@@ -283,10 +361,10 @@ $nodeOpWidth: calc(100% - 64px - 150px);
 @media (max-width: 325px) {
 	.topbar {
 		.nav-action {
-			.node-operate,.insert-node{
+			.node-operate,
+			.insert-node {
 				display: none;
 			}
-			
 		}
 	}
 }
