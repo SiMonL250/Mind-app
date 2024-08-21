@@ -1,3 +1,4 @@
+import { App } from "vue";
 export enum buttonType{
     normal,
     createNewFile,
@@ -18,3 +19,6 @@ export interface buttonProps extends elementProps{
     type:buttonType
 }
 
+export interface PluginOptions {
+    install(app: App): void;
+}

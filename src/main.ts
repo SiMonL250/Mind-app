@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
 import Message from "./components/selfUIs/Message"
+import Loading from './components/selfUIs/Loading'
 
 import { createPinia } from 'pinia'
 import piniaPersist from 'pinia-plugin-persist'
@@ -11,5 +12,6 @@ pinia.use(piniaPersist);
 
 createApp(App)
 .use(Message)
+.use(Loading)
 .use(pinia)
 .mount('#app')

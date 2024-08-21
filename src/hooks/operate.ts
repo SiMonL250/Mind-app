@@ -1,4 +1,6 @@
 import { MindNode } from "../interfaces/MindNodeProperty";
+import { showLoading,hideLoading } from "../components/selfUIs/Loading/loading";
+
 /*
 	file operate and node operates 
 
@@ -14,9 +16,13 @@ export namespace NameSpaceFileOperation {
 export namespace NameSpaceNodeOperate{
 	export const NodeAction= "node-action";
 
-    export const redoAndaUndo = "redo-and-undo";
-    export const insertNode = "insert-node";
-    export const moveUp = "move-node";
+	export const redo = "redo";
+    export const undo = "undo";
+    export const insertNodeChild = "insert-child";
+	export const insertNodeParent = "insert-parent";
+	export const insertNodeSibling = "insert-sibling";
+    export const moveUp = "move-up";
+	export const moveDown = "move-down";
     export const editText = "edit-text";
     export const deleteNode = "delete-node";
     export const setPriority = "set-priority";
@@ -193,9 +199,12 @@ export async function handleNewAndSaveFile(
 			FileSystemFileHandle -> FileSystemWritableStream -> write() ->close stream
 		*/
 
-		Writable.write(JSON.stringify(fileContent));
-// TODO stream close too slow ,可以加个加载动画
-		await Writable.close();
+		Writable.write(JSON.stringify(fileContent)).then(()=>{
+			showLoading();
+		});
+		await Writable.close().finally(()=>{
+			hideLoading();
+		});
 		return fileContent;
 	} catch (error) {
 		//console.error(e);

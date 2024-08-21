@@ -48,4 +48,3 @@ class LocalStorage {
 export const local =  new LocalStorage();
 
 export const mindLocalKey = 'mind-file-store';
-//TODO local存文件。session存文件操作

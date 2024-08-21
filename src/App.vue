@@ -26,7 +26,6 @@ import { ref ,getCurrentInstance,onMounted} from "vue";
 import { EnumReconiteCode,mindFileContent,handleOpenFile,handleNewAndSaveFile,interfaceNodeAction } from "../src/hooks/operate";
 import { FileStore } from '../src/store/MindFileStore'
 import {local,mindLocalKey} from '../src/hooks/localStorage.ts'
-
 /* defines and variables  */
 const instance = getCurrentInstance();
 

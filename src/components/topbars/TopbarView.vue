@@ -26,49 +26,76 @@
 				</div>
 			</div>
 		</div>
-		<div class="action-section nav-action" @click="(e)=>NodeAction(e)">
-			<div class="nav-items redo-and-undo" >
-				<button :disabled="props.redoDisable" class="undo items-btn">
+		<div class="action-section nav-action" @click="(e) => NodeAction(e)">
+			<div class="nav-items redo-and-undo">
+				<button
+					:disabled="props.redoDisable"
+					class="undo items-btn"
+					:data-action="NameSpaceNodeOperate.redo"
+				>
 					👉
 				</button>
-				<button :disabled="props.redoDisable" class="redo items-btn">
+				<button
+					:disabled="props.redoDisable"
+					class="redo items-btn"
+					:data-action="NameSpaceNodeOperate.undo"
+				>
 					👈
 				</button>
 			</div>
-			<div class="nav-items insert-node" >
+			<div class="nav-items insert-node">
 				<button
 					:disabled="props.operateDisable"
 					class="insert-child items-btn"
+					:data-action="NameSpaceNodeOperate.insertNodeChild"
 				>
 					👶child
 				</button>
 				<button
 					:disabled="props.operateDisable"
 					class="insert-father items-btn"
+					:data-action="NameSpaceNodeOperate.insertNodeParent"
 				>
 					👨father
 				</button>
 				<button
 					:disabled="props.operateDisable"
 					class="insert-sibling items-btn"
+					:data-action="NameSpaceNodeOperate.insertNodeSibling"
 				>
 					🧑sibling
 				</button>
 			</div>
 			<div class="nav-items node-operate">
-				<div class="node-operate-items" >
-					<button :disabled="props.operateDisable" class="items-btn">
+				<div class="node-operate-items">
+					<button
+						:disabled="props.operateDisable"
+						class="items-btn"
+						:data-action="NameSpaceNodeOperate.moveUp"
+					>
 						👆up
 					</button>
-					<button :disabled="props.operateDisable" class="items-btn">
+					<button
+						:disabled="props.operateDisable"
+						class="items-btn"
+						:data-action="NameSpaceNodeOperate.moveDown"
+					>
 						👇down
 					</button>
 				</div>
 				<div class="node-operate-items">
-					<button :disabled="props.operateDisable"  class="items-btn">
+					<button
+						:disabled="props.operateDisable"
+						class="items-btn"
+						:data-action="NameSpaceNodeOperate.editText"
+					>
 						✍text
 					</button>
-					<button :disabled="props.operateDisable" class="items-btn">
+					<button
+						:disabled="props.operateDisable"
+						class="items-btn"
+						:data-action="NameSpaceNodeOperate.deleteNode"
+					>
 						❌delete
 					</button>
 				</div>
@@ -78,13 +105,15 @@
 						v-for="[key, val] of (enumValues as Array<[string,string]>)"
 						:key="key"
 						:disabled="props.operateDisable"
+						:data-action="NameSpaceNodeOperate.setPriority"
+						:data-val="val"
 					>
 						{{ val }}
 					</button>
 					<button
 						class="items-btn"
-						
 						:disabled="props.operateDisable"
+						:data-action="NameSpaceNodeOperate.setPriority"
 					>
 						#
 					</button>
@@ -98,14 +127,14 @@
 import { debounce } from "../../hooks/debounce";
 import { buttonType, buttonProps } from "../../interfaces/ComponentProperty";
 import { PriorytyLevel } from "../../interfaces/MindNodeProperty";
-import { NameSpaceFileOperation,NameSpaceNodeOperate,interfaceNodeAction } from "../../hooks/operate";
+import {
+	NameSpaceFileOperation,
+	NameSpaceNodeOperate,
+	interfaceNodeAction,
+} from "../../hooks/operate";
 import { ref } from "vue";
 
-const enumValues = ref(
-	Object.entries(PriorytyLevel).slice(
-		Object.entries(PriorytyLevel).length / 2
-	)
-);
+const enumValues = ref(Object.entries(PriorytyLevel));
 const model = defineModel();
 const props = defineProps({
 	redoDisable: {
@@ -153,14 +182,22 @@ const buttonsProps: buttonProps[] = [
 	},
 ];
 
+function NodeAction(e: Event) {
+	if (
+		e.target instanceof Element &&
+		(e.target as HTMLElement).tagName !== "BUTTON"
+	)
+		return;
 
-function NodeAction(e:Event,val?:any){
-	if((e.target) instanceof Element && (e.target as HTMLElement).tagName !== 'BUTTON') return ;
-	console.dir(e.target);
-	//TODO 可以把所有的操作放在这里写，以{action:string,value?:any}的形式Emits
+	//把所有的操作Emits放在这里写，以{action:string,value?:any}的形式Emits
 	//根据 e.target 判断 action 和 val
-	let toEmit:interfaceNodeAction = {action:'fuck',val:val}
-	Emits(NameSpaceNodeOperate.NodeAction,toEmit);
+
+	let target = e.target as HTMLElement;
+	let toEmit: interfaceNodeAction = {
+		action: target.dataset["action"],
+		val: target.dataset["val"],
+	};
+	Emits(NameSpaceNodeOperate.NodeAction, toEmit);
 }
 
 function changeMindNameEmits(newName: string): void {
@@ -184,7 +221,7 @@ function shortcutsClick(): void {
 $fileSectionHeight: calc(var(--height-topbar) * 0.29);
 $undoWidth: 64px;
 $insertWidth: 235px;
-$nodeOpWidth: calc(100% - 64px - 150px);
+$nodeOpWidth: calc(100% - $undoWidth - $insertWidth);
 
 .topbar {
 	user-select: none;
@@ -255,6 +292,7 @@ $nodeOpWidth: calc(100% - 64px - 150px);
 			border-right: 1px solid var(--color-border-insection);
 			padding: 0px 10px;
 			box-sizing: border-box;
+			overflow: hidden;
 			.items-btn {
 				max-height: 100%;
 				transition: 0.3s ease-in;
@@ -282,6 +320,7 @@ $nodeOpWidth: calc(100% - 64px - 150px);
 		}
 		.redo-and-undo {
 			width: $undoWidth;
+			min-width: 50px;
 			display: grid;
 			grid-template-rows: 1fr 1fr;
 			grid-template-columns: 1fr;
@@ -297,6 +336,7 @@ $nodeOpWidth: calc(100% - 64px - 150px);
 		}
 		.insert-node {
 			width: $insertWidth;
+			min-width: 210px;
 			display: grid;
 			grid-template-rows: 1fr 1fr; /* 创建两行，各占剩余空间的比例 */
 			grid-template-columns: 1fr 1fr; /* 创建两列，各占剩余空间的比例 */
@@ -316,6 +356,7 @@ $nodeOpWidth: calc(100% - 64px - 150px);
 		}
 		.node-operate {
 			width: $nodeOpWidth;
+			min-width: 680px;
 			border-right: none;
 			display: grid;
 			grid-template-columns: 1fr 1fr 2fr 4fr;
@@ -358,7 +399,7 @@ $nodeOpWidth: calc(100% - 64px - 150px);
 		}
 	}
 }
-@media (max-width: 325px) {
+@media (max-width: 470px) {
 	.topbar {
 		.nav-action {
 			.node-operate,

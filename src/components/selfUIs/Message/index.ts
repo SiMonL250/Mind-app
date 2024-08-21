@@ -1,10 +1,8 @@
 import message from "./message";
-import { App, Component } from 'vue';
+import { Component } from 'vue';
+import {PluginOptions} from '../../../interfaces/ComponentProperty'
 
 
-interface PluginOptions {
-    install(app: App): void;
-}
 
  const Message:PluginOptions = {
 	install(app) {

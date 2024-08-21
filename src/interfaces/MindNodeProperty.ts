@@ -3,11 +3,11 @@
 */
 
 export enum PriorytyLevel{
-    highest=0,
-    higher,
-    medium,
-    lower,
-    lowest,
+    highest='0',
+    higher='1',
+    medium='2',
+    lower='3',
+    lowest='4',
 }
 export type NodeIdType = string
 
