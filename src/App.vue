@@ -13,15 +13,14 @@
 			/>
 		</section>
 		<section class="main-section">
-			
-			<MainView :mindNode="MindFile.mindNode" />
+			<treeChart :mindNode="MindFile.mindNode" />
 		</section>
 	</div>
 </template>
 
 <script setup lang="ts">
 import TopbarView from "./components/topbars/TopbarView.vue";
-import MainView from "./components/main/MainView.vue";
+import treeChart from "./components/treeChart/treeChart.vue";
 import { ref ,getCurrentInstance,onMounted} from "vue";
 import { EnumReconiteCode,mindFileContent,handleOpenFile,handleNewAndSaveFile,interfaceNodeAction } from "../src/hooks/operate";
 import { FileStore } from '../src/store/MindFileStore'
