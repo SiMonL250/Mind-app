@@ -1,10 +1,11 @@
 import { App } from "vue";
 export enum buttonType{
-    normal,
-    createNewFile,
-    openFile,
-    saveFile,
-    showShortcus
+    normal = 'normal',
+    createNewFile = 'createNewFile',
+    openFile = 'openFile',
+    saveFile = 'saveFile',
+    showModal = 'showModal',
+    showTools = 'showTools'
 }
 
 export interface elementProps{

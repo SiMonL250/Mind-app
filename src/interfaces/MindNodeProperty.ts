@@ -24,6 +24,7 @@ export type MindNode = { // tree
 }|null;
 
 //tree struct funcyion
+//TODO generate tree node id function 
 export function traverseMindNode(node:MindNode):void{
     if(!node) return;
     if(node && node.data){
@@ -46,6 +47,22 @@ export function findMindNodebyId(node:MindNode,id:NodeIdType):MindNode|null{
     return null;
 }
 
+export function getFatherNode(tree:MindNode,child:MindNode,):MindNode|null{
+    if(!tree) return null;
+    if(tree === child) return null;
+
+    let childId:NodeIdType = child.data.id;
+    const stack = [tree];
+
+    while(stack.length){
+        const node = stack.pop();
+        if (node.children.some(child => child.data.id === childId)) {
+            return node;
+        }
+        stack.push(...node.children);
+    }
+    return null;
+}
 //插入子节点
 export function insertChildNode(tree:MindNode,child:MindNode,fatherId:NodeIdType){
     if(!tree || !tree.children) return;
@@ -58,6 +75,7 @@ export function insertChildNode(tree:MindNode,child:MindNode,fatherId:NodeIdType
         insertChildNode(node,child,fatherId);
     }
 }
+
 
 //插入父节点
 export function insertFatherNode(tree:MindNode,fatherNode:MindNode,childId:NodeIdType){

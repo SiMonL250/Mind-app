@@ -130,7 +130,8 @@ import { PriorytyLevel } from "../../interfaces/MindNodeProperty";
 import {
 	NameSpaceFileOperation,
 	NameSpaceNodeOperate,
-	interfaceNodeAction,
+	NameSpaceOtherOperation,
+	interfaceEmitsAction,
 } from "../../hooks/operate";
 import { ref } from "vue";
 
@@ -151,7 +152,7 @@ const Emits = defineEmits([
 	NameSpaceFileOperation.openFile,
 	NameSpaceFileOperation.createNewFile,
 	NameSpaceFileOperation.saveFile,
-
+	NameSpaceOtherOperation.showModal,
 	NameSpaceNodeOperate.NodeAction,
 ]);
 // const mindName = reactive({name:topbar_props.name})
@@ -177,8 +178,14 @@ const buttonsProps: buttonProps[] = [
 	{
 		classList: ["file-operate-btn"],
 		innerText: "shortcut🔪",
-		type: buttonType.createNewFile,
-		eventClickHandle: shortcutsClick,
+		type: buttonType.showModal,
+		eventClickHandle: showModalClick,
+	},
+	{
+		classList: ["file-operate-btn"],
+		innerText: "tools🔨",
+		type: buttonType.showModal,
+		eventClickHandle: showModalClick,
 	},
 ];
 
@@ -193,7 +200,7 @@ function NodeAction(e: Event) {
 	//根据 e.target 判断 action 和 val
 
 	let target = e.target as HTMLElement;
-	let toEmit: interfaceNodeAction = {
+	let toEmit: interfaceEmitsAction = {
 		action: target.dataset["action"],
 		val: target.dataset["val"],
 	};
@@ -212,8 +219,12 @@ function selectFileClick(): void {
 function saveFileClick(): void {
 	Emits(NameSpaceFileOperation.saveFile);
 }
-function shortcutsClick(): void {
-	console.log("show shortcut :>> ");
+function showModalClick(): void { //TODO  emits modal show
+	let actions:interfaceEmitsAction = {
+		action:NameSpaceOtherOperation.showModal,
+		val:true
+	} 
+	Emits(NameSpaceOtherOperation.showModal,actions);
 }
 </script>
 

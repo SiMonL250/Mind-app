@@ -12,7 +12,10 @@ export namespace NameSpaceFileOperation {
 	export const openFile = "open-file";
 	export const createNewFile = "create-file";
 	export const saveFile = "save-file";
+
+	
 }
+
 export namespace NameSpaceNodeOperate{
 	export const NodeAction= "node-action";
 
@@ -26,7 +29,10 @@ export namespace NameSpaceNodeOperate{
     export const editText = "edit-text";
     export const deleteNode = "delete-node";
     export const setPriority = "set-priority";
-    
+}
+
+export namespace NameSpaceOtherOperation{
+	export const showModal = "show-modal";
 }
 /*NAMESPACE END  */ 
 /*ENUMS START  */ 
@@ -47,7 +53,7 @@ export enum EnumDirectoryWellknow {
 }
 /*ENUMS  END  */
 /*INTERFACE START  */ 
-export interface interfaceNodeAction {
+export interface interfaceEmitsAction {
 	action:string,
 	val?:any
 }
