@@ -18,12 +18,13 @@
 				parentLevel:
 					Array.isArray(node.children) && node.children.length,
 			}"
-			v-if="Array.isArray(node.children) && node.children.length"
+			v-if="node && Array.isArray(node.children) && node.children.length"
 		>
 			<treeChart
 				v-for="(n, ind) in node.children"
 				:key="ind"
 				:node="n"
+				:treeRoot="treeRoot"
 			></treeChart>
 		</div>
 	</div>
@@ -31,38 +32,38 @@
 
 <script setup lang="ts">
 import treeChart from "./treeChart.vue";
-import { MindNode, NodeIdType } from "../../interfaces/MindNodeProperty";
+import { MindNode, getFatherNode } from "../../interfaces/MindNodeProperty";
 import { watch, ref, onMounted } from "vue";
-import { onBeforeMount } from "vue";
 //props and variables
 const treeProp = defineProps<{
-	node: MindNode;
+	node: MindNode,
+	treeRoot:MindNode,
 }>();
 let nodeDomRect:DOMRect;
-const curNode = ref(null);
-let nodeId: NodeIdType;
-//TODO 获取元素上边中点和它的父节点的下边中点
-
-// const DomRect: DOMRect = (curNode.value as Element).getBoundingClientRect();
+const curNodeEle = ref(null);
+let fatherDomRect:DOMRect;
 
 /* events methods */
 
 /* live hooks */
 watch(treeProp, (_newVal) => {
 	//TODO update nodeDomRect
-	//console.log("newVal :>> ", newVal.node);
-	//traverseMindNode(treeProp.node);
 });
-onBeforeMount(()=>{
-	nodeId = treeProp.node?.data.id;
-	//console.log('nodeId :>> ', nodeId);
-})
+
 onMounted(() => {
-	
-	const nodeElement: Element = curNode?.value as Element;
+	let fatherNode:MindNode;
+	let fatherEle:Element;
+	const nodeElement: Element = curNodeEle?.value as Element;
 	if(nodeElement) nodeDomRect = nodeElement.getBoundingClientRect();
-	//console.log('object :>> ', nodeDomRect);
 	
+	fatherNode = getFatherNode(treeProp.treeRoot,treeProp.node);
+	// console.log('fatherNode :>> ', {f:fatherNode?.data.id,c:treeProp.node});
+	if(fatherNode){
+		fatherEle = document.getElementById(fatherNode.data.id);
+		console.dir(fatherEle.innerHTML)
+		//TODO 获取元素上边中点和它的父节点的下边中点
+		fatherDomRect = fatherEle.getBoundingClientRect();
+	}
 });
 </script>
 

@@ -12,10 +12,19 @@
 			/>
 		</section>
 		<section class="main-section">
-			<treeChart :node="MindFile.mindNode" />
+			<treeChart :node="MindFile.mindNode" :treeRoot="MindFile.mindNode"/>
 		</section>
-		<Modal>
-
+		<Modal :show="isShowModal" @close-modal="closeModalHandle">
+			<template #title>
+				<div>
+					<p>my tools box</p>
+				</div>
+			</template>
+			<template #body>
+				<Sidebar :itemList="sidebarItemList" @switch-tool="switchToolHandle"/>
+				<!-- TODO change Component -->
+				<div class="tool-component">{{curTool}}</div>
+			</template>
 		</Modal>
 	</div>
 </template>
@@ -23,8 +32,9 @@
 <script setup lang="ts">
 import TopbarView from "./components/topbars/TopbarView.vue";
 import treeChart from "./components/treeChart/treeChart.vue";
-import Modal from "./components/selfUIs/Modal/Modal.vue"
-import { ref, getCurrentInstance, onMounted } from "vue";
+import Modal from "./components/selfUIs/Modal/Modal.vue";
+import Sidebar from "./components/sidebars/SidebarView.vue";
+import { ref, getCurrentInstance, onMounted, Ref } from "vue";
 import {
 	EnumReconiteCode,
 	mindFileContent,
@@ -35,6 +45,7 @@ import {
 //import {getFatherNode} from "../src/interfaces/MindNodeProperty"
 import { FileStore } from "../src/store/MindFileStore";
 import { local, mindLocalKey } from "../src/hooks/localStorage.ts";
+import { sidebarProps, toolTypes } from "./interfaces/ComponentProperty";
 /* defines and variables  */
 const instance = getCurrentInstance();
 
@@ -49,6 +60,13 @@ let MindFile = ref<mindFileContent>({
 	mindName: "Mind",
 	mindNode: null,
 });
+const isShowModal = ref(false);
+const sidebarItemList: sidebarProps[] = [
+	{toolType:toolTypes.CrcCheck,innerText:"Crc Check"},
+	{toolType:toolTypes.HexBinDecOct,innerText:`${toolTypes.HexBinDecOct}`}
+];
+const curTool:Ref<toolTypes> = ref(toolTypes.CrcCheck);
+
 /* defines and variables  */
 /* Even handle function  */
 function changeMindNameHandle(newName: string): void {
@@ -81,8 +99,16 @@ function nodeAction(action: interfaceEmitsAction) {
 	console.log("action :>> ", action);
 }
 
-function showModalHandle(action:interfaceEmitsAction){
-	console.log('action :>> ', action);
+function showModalHandle(action: interfaceEmitsAction) {
+	// console.log('action :>> ', action);
+	isShowModal.value = action?.val;
+}
+function closeModalHandle(action:interfaceEmitsAction){
+	isShowModal.value = action.val;
+}
+function switchToolHandle(action: interfaceEmitsAction){
+	console.log('action.val :>> ', action.val);
+	curTool.value = action.val;
 }
 /* Even handle function  */
 /* live Hooks  */
@@ -146,5 +172,8 @@ function storeAndMindInit() {
 			background-color: #555;
 		}
 	}
+}
+.tool-component{
+	padding: 4px;
 }
 </style>

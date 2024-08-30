@@ -32,7 +32,9 @@ export namespace NameSpaceNodeOperate{
 }
 
 export namespace NameSpaceOtherOperation{
+	export const switchTool = 'switch-tool';
 	export const showModal = "show-modal";
+	export const closeModal = "close-modal";
 }
 /*NAMESPACE END  */ 
 /*ENUMS START  */ 

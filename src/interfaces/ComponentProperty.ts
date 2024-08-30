@@ -8,6 +8,12 @@ export enum buttonType{
     showTools = 'showTools'
 }
 
+export enum toolTypes{
+    CrcCheck='CrcCheck',
+    HexBinDecOct='HexBinDecOct',
+    //TODO 想要什么就加什么吧
+}
+
 export interface elementProps{
     classList?:string[],
     id?:string,
@@ -20,6 +26,10 @@ export interface buttonProps extends elementProps{
     type:buttonType
 }
 
+export interface sidebarProps extends elementProps{
+    toolType:toolTypes
+}
 export interface PluginOptions {
     install(app: App): void;
 }
+

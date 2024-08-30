@@ -401,7 +401,7 @@ $nodeOpWidth: calc(100% - $undoWidth - $insertWidth);
 		border-bottom: 1px solid var(--color-border-default);
 	}
 }
-@media (max-width: 673px) {
+@media (max-width: 841px) {
 	.topbar {
 		.file-section {
 			.file-operate {
