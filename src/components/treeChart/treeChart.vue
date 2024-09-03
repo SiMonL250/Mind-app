@@ -7,7 +7,7 @@
 					Array.isArray(node.children) && node.children.length,
 			}"
 		>
-			<div class="treeNode" :id="node.data.id" ref="curNode">
+			<div class="treeNode" :id="node.data.id" ref="curNodeEle">
 				{{ node.data.text }}
 			</div>
 		</div>
@@ -32,17 +32,28 @@
 
 <script setup lang="ts">
 import treeChart from "./treeChart.vue";
-import { MindNode, getFatherNode } from "../../interfaces/MindNodeProperty";
+import {
+	MindNode,
+	getFatherNode,
+	NodeIdType,
+} from "../../interfaces/MindNodeProperty";
 import { watch, ref, onMounted } from "vue";
 //props and variables
 const treeProp = defineProps<{
-	node: MindNode,
-	treeRoot:MindNode,
+	node: MindNode;
+	treeRoot: MindNode;
 }>();
-let nodeDomRect:DOMRect;
-const curNodeEle = ref(null);
-let fatherDomRect:DOMRect;
 
+const curNodeEle = ref(null);
+interface interfaceNodePos {
+	DomRect:DOMRect,
+	id: NodeIdType;
+}
+interface interfaceChildAndFatherPos {
+	father: interfaceNodePos;
+	child: interfaceNodePos;
+}
+let childAndFatherPos: interfaceChildAndFatherPos;
 /* events methods */
 
 /* live hooks */
@@ -51,20 +62,38 @@ watch(treeProp, (_newVal) => {
 });
 
 onMounted(() => {
-	let fatherNode:MindNode;
-	let fatherEle:Element;
-	const nodeElement: Element = curNodeEle?.value as Element;
-	if(nodeElement) nodeDomRect = nodeElement.getBoundingClientRect();
-	
-	fatherNode = getFatherNode(treeProp.treeRoot,treeProp.node);
-	// console.log('fatherNode :>> ', {f:fatherNode?.data.id,c:treeProp.node});
-	if(fatherNode){
-		fatherEle = document.getElementById(fatherNode.data.id);
-		console.dir(fatherEle.innerHTML)
-		//TODO 获取元素上边中点和它的父节点的下边中点
-		fatherDomRect = fatherEle.getBoundingClientRect();
-	}
+	getNodeAndFatherDomRect();
+	console.dir( childAndFatherPos);
 });
+function getNodeAndFatherDomRect() {
+	let fatherNode: MindNode;
+	let fatherEle: Element;
+	let fatherDomRect: DOMRect;
+	let nodeDomRect: DOMRect;
+	
+	if (treeProp.node) {
+		const nodeElement: Element = curNodeEle?.value as Element;
+		nodeDomRect = nodeElement?.getBoundingClientRect();
+		fatherNode = getFatherNode(treeProp.treeRoot, treeProp.node);
+		if (fatherNode) {
+			fatherEle = document.getElementById(fatherNode.data.id);
+			//console.dir(fatherEle.innerHTML)
+			//获取元素上边中点和它的父节点的下边中点
+			fatherDomRect = fatherEle.getBoundingClientRect();
+			//TODO 确定node在canvas里的位置，划线  贝塞尔曲线
+			childAndFatherPos = {
+				child: {
+					DomRect:nodeDomRect,
+					id: treeProp.node.data.id,
+				},
+				father:{
+					DomRect:fatherDomRect,
+					id:fatherNode.data.id
+				}
+			};
+		}
+	}
+}
 </script>
 
 <style scoped lang="scss">

@@ -219,7 +219,7 @@ function selectFileClick(): void {
 function saveFileClick(): void {
 	Emits(NameSpaceFileOperation.saveFile);
 }
-function showModalClick(): void { //TODO  emits modal show
+function showModalClick(): void { // emits modal show
 	let actions:interfaceEmitsAction = {
 		action:NameSpaceOtherOperation.showModal,
 		val:true

@@ -23,8 +23,12 @@ export type MindNode = { // tree
     children:Array<MindNode>,
 }|null;
 
-//tree struct funcyion
-//TODO generate tree node id function 
+//tree struct function
+// generate tree node id function 
+export  function generateNodeId(fatherId:NodeIdType):NodeIdType{
+    const timeStampStr: string = new Date().getTime().toString();
+    return fatherId+`Son${timeStampStr}`;
+}
 export function traverseMindNode(node:MindNode):void{
     if(!node) return;
     if(node && node.data){
