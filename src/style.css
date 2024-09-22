@@ -32,3 +32,9 @@
   margin: 0;
   color:var(--color-font);
 }
+body{
+  overflow: hidden;
+}
+.leader-line{
+  z-index: -2;
+}

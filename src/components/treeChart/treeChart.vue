@@ -1,13 +1,17 @@
 <template>
 	<div class="tree-chart" v-if="node">
-		<canvas class="draw-canvas" :id="`canvas-for-${node.data.id}`"></canvas>
 		<div
 			:class="{
 				parentLevel:
 					Array.isArray(node.children) && node.children.length,
 			}"
 		>
-			<div class="treeNode" :id="node.data.id" ref="curNodeEle">
+			<div
+				class="treeNode"
+				:id="node.data.id"
+				ref="curNodeEle"
+				@contextmenu="(e)=>{rightClick(e,node)}"
+			>
 				{{ node.data.text }}
 			</div>
 		</div>
@@ -25,6 +29,8 @@
 				:key="ind"
 				:node="n"
 				:treeRoot="treeRoot"
+				:isMainScroll="isMainScroll"
+				@node-right-click="EmitFromChild"
 			></treeChart>
 		</div>
 	</div>
@@ -32,68 +38,108 @@
 
 <script setup lang="ts">
 import treeChart from "./treeChart.vue";
+import { MindNode, getFatherNode } from "../../interfaces/MindNodeProperty";
+import { interfaceChildAndFatherProp, LeadLineOptions } from "./tree";
+import { ref, onMounted, onUnmounted } from "vue";
+import LeaderLine from "leader-line-vue";
+import { watch } from "vue";
 import {
-	MindNode,
-	getFatherNode,
-	NodeIdType,
-} from "../../interfaces/MindNodeProperty";
-import { watch, ref, onMounted } from "vue";
+	NameSpaceNodeOperate,
+	interfaceEmitsAction,
+} from "../../hooks/operate";
 //props and variables
 const treeProp = defineProps<{
 	node: MindNode;
 	treeRoot: MindNode;
+	isMainScroll: boolean;
 }>();
-
+const emits = defineEmits([NameSpaceNodeOperate.NodeRightClick]);
 const curNodeEle = ref(null);
-interface interfaceNodePos {
-	DomRect:DOMRect,
-	id: NodeIdType;
-}
-interface interfaceChildAndFatherPos {
-	father: interfaceNodePos;
-	child: interfaceNodePos;
-}
-let childAndFatherPos: interfaceChildAndFatherPos;
+let line: LeaderLine;
+let childAndFatherProp: interfaceChildAndFatherProp;
+
 /* events methods */
-
+window.addEventListener(
+	"resize",
+	() => {
+		line?.position();
+	},
+	false
+);
+// TODO 节点右键菜单
+function rightClick(e:Event,node:MindNode) {
+	e.preventDefault();
+	//emit to direct parent
+	console.dir('e :>> ', typeof e);
+	console.log('node :>> ', node);
+	let action:interfaceEmitsAction= {
+		action:NameSpaceNodeOperate.NodeRightClick,
+		val:e
+	}
+	emits(NameSpaceNodeOperate.NodeRightClick,action);
+}
+function EmitFromChild(action:interfaceEmitsAction){
+	console.log('son Emit :>> ');
+	//child emit to App.vue
+	emits(NameSpaceNodeOperate.NodeRightClick,action);
+}
 /* live hooks */
-watch(treeProp, (_newVal) => {
-	//TODO update nodeDomRect
-});
-
+watch(
+	() => treeProp.isMainScroll,
+	(newVal, oldVal) => {
+		if (newVal != oldVal) {
+			line?.position();
+		}
+	}
+);
 onMounted(() => {
-	getNodeAndFatherDomRect();
-	console.dir( childAndFatherPos);
+	getNodeAndFatherProp();
+	//console.dir( childAndFatherPos);
+	drawByLeaderLine();
 });
-function getNodeAndFatherDomRect() {
+function getNodeAndFatherProp() {
 	let fatherNode: MindNode;
-	let fatherEle: Element;
-	let fatherDomRect: DOMRect;
-	let nodeDomRect: DOMRect;
-	
+
 	if (treeProp.node) {
-		const nodeElement: Element = curNodeEle?.value as Element;
-		nodeDomRect = nodeElement?.getBoundingClientRect();
 		fatherNode = getFatherNode(treeProp.treeRoot, treeProp.node);
 		if (fatherNode) {
-			fatherEle = document.getElementById(fatherNode.data.id);
-			//console.dir(fatherEle.innerHTML)
-			//获取元素上边中点和它的父节点的下边中点
-			fatherDomRect = fatherEle.getBoundingClientRect();
-			//TODO 确定node在canvas里的位置，划线  贝塞尔曲线
-			childAndFatherPos = {
+			childAndFatherProp = {
 				child: {
-					DomRect:nodeDomRect,
 					id: treeProp.node.data.id,
 				},
-				father:{
-					DomRect:fatherDomRect,
-					id:fatherNode.data.id
-				}
+				father: {
+					id: fatherNode.data.id, // get canvas by this id
+				},
 			};
 		}
 	}
 }
+
+function drawByLeaderLine() {
+	if (
+		!childAndFatherProp &&
+		!childAndFatherProp?.child &&
+		!childAndFatherProp?.father
+	)
+		return;
+	let option: LeadLineOptions = {
+		startPlug: "disc",
+		endPlug: "disc",
+		size: 1,
+		startSocket: "bottom",
+		endSocket: "top",
+		color: "#ccc",
+		path: "straight",
+	};
+	line = LeaderLine.setLine(
+		document.getElementById(childAndFatherProp.father.id),
+		curNodeEle.value,
+		option
+	);
+}
+onUnmounted(() => {
+	line?.remove();
+});
 </script>
 
 <style scoped lang="scss">
@@ -104,29 +150,20 @@ $colorNodeBkg: #fafafa;
 	width: fit-content;
 	box-sizing: border-box;
 }
-.draw-canvas {
-	position: absolute;
-	z-index: -1;
-	width: 100%;
-	height: 100%;
-	top: 0;
-	left: 0;
-	border: 1px solid black;
-}
 .parentLevel {
 	width: fit-content;
 	box-sizing: border-box;
 }
 .childLevel {
 	display: flex;
-	margin-top: 10px;
+	margin-top: 20px;
 	box-sizing: border-box;
 }
 .treeNode {
 	width: fit-content;
 	border: 1px solid $nodeBorderColor;
 	border-radius: 5px;
-	margin: 4px 0.2em 0 0;
+	margin: 15px 0.2em 0 0;
 	text-align: center;
 	box-sizing: border-box;
 	padding: 5px;

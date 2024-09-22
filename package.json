@@ -10,6 +10,7 @@
     "run": "npx vite --port=5173"
   },
   "dependencies": {
+    "leader-line-vue": "^2.1.1",
     "vue": "^3.4.31"
   },
   "devDependencies": {

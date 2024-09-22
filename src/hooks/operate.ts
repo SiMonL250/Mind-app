@@ -19,6 +19,8 @@ export namespace NameSpaceFileOperation {
 export namespace NameSpaceNodeOperate{
 	export const NodeAction= "node-action";
 
+	export const NodeRightClick = "node-right-click"
+
 	export const redo = "redo";
     export const undo = "undo";
     export const insertNodeChild = "insert-child";

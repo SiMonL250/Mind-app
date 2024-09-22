@@ -11,8 +11,14 @@
 				@node-action="nodeAction"
 			/>
 		</section>
-		<section class="main-section">
-			<treeChart :node="MindFile.mindNode" :treeRoot="MindFile.mindNode"/>
+		<section class="main-section" @scroll="mainSectionScroll">
+			<treeChart
+				:node="MindFile.mindNode"
+				:treeRoot="MindFile.mindNode"
+				ref="treeChartRef"
+				:is-main-scroll="isMainScroll"
+				@node-right-click="NodeRightClick"
+			/>
 		</section>
 		<Modal :show="isShowModal" @close-modal="closeModalHandle">
 			<template #title>
@@ -21,9 +27,12 @@
 				</div>
 			</template>
 			<template #body>
-				<Sidebar :itemList="sidebarItemList" @switch-tool="switchToolHandle"/>
+				<Sidebar
+					:itemList="sidebarItemList"
+					@switch-tool="switchToolHandle"
+				/>
 				<!-- TODO change Component -->
-				<div class="tool-component">{{curTool}}</div>
+				<div class="tool-component">{{ curTool }}</div>
 			</template>
 		</Modal>
 	</div>
@@ -48,13 +57,13 @@ import { local, mindLocalKey } from "../src/hooks/localStorage.ts";
 import { sidebarProps, toolTypes } from "./interfaces/ComponentProperty";
 /* defines and variables  */
 const instance = getCurrentInstance();
-
+const treeChartRef = ref(null);
 interface localStoredType {
 	fileName: string;
 	fileContent: mindFileContent;
 }
 const fileStore = FileStore();
-
+const isMainScroll = ref(false);
 let MindFile = ref<mindFileContent>({
 	reconicode: EnumReconiteCode.MindJson,
 	mindName: "Mind",
@@ -62,10 +71,13 @@ let MindFile = ref<mindFileContent>({
 });
 const isShowModal = ref(false);
 const sidebarItemList: sidebarProps[] = [
-	{toolType:toolTypes.CrcCheck,innerText:"Crc Check"},
-	{toolType:toolTypes.HexBinDecOct,innerText:`${toolTypes.HexBinDecOct}`}
+	{ toolType: toolTypes.CrcCheck, innerText: "Crc Check" },
+	{
+		toolType: toolTypes.HexBinDecOct,
+		innerText: `${toolTypes.HexBinDecOct}`,
+	},
 ];
-const curTool:Ref<toolTypes> = ref(toolTypes.CrcCheck);
+const curTool: Ref<toolTypes> = ref(toolTypes.CrcCheck);
 
 /* defines and variables  */
 /* Even handle function  */
@@ -103,12 +115,20 @@ function showModalHandle(action: interfaceEmitsAction) {
 	// console.log('action :>> ', action);
 	isShowModal.value = action?.val;
 }
-function closeModalHandle(action:interfaceEmitsAction){
+function closeModalHandle(action: interfaceEmitsAction) {
 	isShowModal.value = action.val;
 }
-function switchToolHandle(action: interfaceEmitsAction){
-	console.log('action.val :>> ', action.val);
+function switchToolHandle(action: interfaceEmitsAction) {
+	console.log("action.val :>> ", action.val);
 	curTool.value = action.val;
+}
+
+function mainSectionScroll(){
+	isMainScroll.value = !isMainScroll.value
+}
+
+function NodeRightClick(action: interfaceEmitsAction){
+	console.log('App action :>> ', action);
 }
 /* Even handle function  */
 /* live Hooks  */
@@ -173,7 +193,7 @@ function storeAndMindInit() {
 		}
 	}
 }
-.tool-component{
+.tool-component {
 	padding: 4px;
 }
 </style>

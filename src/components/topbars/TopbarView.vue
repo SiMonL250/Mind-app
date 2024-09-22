@@ -238,6 +238,7 @@ $nodeOpWidth: calc(100% - $undoWidth - $insertWidth);
 	user-select: none;
 	height: 100%;
 	word-break: normal;
+	box-sizing: border-box;
 	.file-section {
 		width: 100%;
 		height: $fileSectionHeight;
