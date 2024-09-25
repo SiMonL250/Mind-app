@@ -30,7 +30,7 @@ const showModal:Ref<boolean> = ref(props.show);
 const Emits = defineEmits([NameSpaceOtherOperation.closeModal])
 //event
 function closeModalEmits(){
-    const action:interfaceEmitsAction = {
+    const action:interfaceEmitsAction<boolean> = {
         action:NameSpaceOtherOperation.closeModal,
         val:false
     }

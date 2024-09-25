@@ -10,7 +10,11 @@
 				class="treeNode"
 				:id="node.data.id"
 				ref="curNodeEle"
-				@contextmenu="(e)=>{rightClick(e,node)}"
+				@contextmenu="
+					(e) => {
+						rightClick(e as PointerEvent, node);
+					}
+				"
 			>
 				{{ node.data.text }}
 			</div>
@@ -38,7 +42,11 @@
 
 <script setup lang="ts">
 import treeChart from "./treeChart.vue";
-import { MindNode, getFatherNode } from "../../interfaces/MindNodeProperty";
+import {
+	MindNode,
+	getFatherNode,
+	PriorytyLevel,
+} from "../../interfaces/MindNodeProperty";
 import { interfaceChildAndFatherProp, LeadLineOptions } from "./tree";
 import { ref, onMounted, onUnmounted } from "vue";
 import LeaderLine from "leader-line-vue";
@@ -47,6 +55,7 @@ import {
 	NameSpaceNodeOperate,
 	interfaceEmitsAction,
 } from "../../hooks/operate";
+import { menuProps,rightClickValType } from "../selfUIs/contextMenu/contextMenu";
 //props and variables
 const treeProp = defineProps<{
 	node: MindNode;
@@ -67,21 +76,61 @@ window.addEventListener(
 	false
 );
 // TODO 节点右键菜单
-function rightClick(e:Event,node:MindNode) {
+function rightClick(e: PointerEvent, node: MindNode) {
+	// console.log("e :>> ", e);
 	e.preventDefault();
 	//emit to direct parent
-	console.dir('e :>> ', typeof e);
-	console.log('node :>> ', node);
-	let action:interfaceEmitsAction= {
-		action:NameSpaceNodeOperate.NodeRightClick,
-		val:e
-	}
-	emits(NameSpaceNodeOperate.NodeRightClick,action);
+
+	let val: rightClickValType = {
+		menu: {
+			position: {
+				clientX: e.clientX,
+				clientY: e.clientY,
+			},
+			items: [
+				{ id: "editText", text: "edit text" },
+				{ id: "insertChild", text: "insert child" },
+				{ id: "insertSibling", text: "insert sibling" },
+				{ id: "insertFather", text: "insert father" },
+				{
+					id: "setPriority",
+					text: "priority",
+					subMenu: [
+						{
+							id: PriorytyLevel.highest,
+							text: PriorytyLevel.highest,
+						},
+						{
+							id: PriorytyLevel.higher,
+							text: PriorytyLevel.higher,
+						},
+						{
+							id: PriorytyLevel.medium,
+							text: PriorytyLevel.medium,
+						},
+						{ id: PriorytyLevel.lower, text: PriorytyLevel.lower },
+						{
+							id: PriorytyLevel.lowest,
+							text: PriorytyLevel.lowest,
+						},
+						{ id: PriorytyLevel.none, text: PriorytyLevel.none },
+					],
+				},
+			],
+		},
+		treeNode: node,
+	};
+	let action: interfaceEmitsAction<{ menu: menuProps; treeNode: MindNode }> =
+		{
+			action: NameSpaceNodeOperate.NodeRightClick,
+			val: val, //TODO 把clientX和ClientY emit下去
+		};
+	emits(NameSpaceNodeOperate.NodeRightClick, action);
 }
-function EmitFromChild(action:interfaceEmitsAction){
-	console.log('son Emit :>> ');
-	//child emit to App.vue
-	emits(NameSpaceNodeOperate.NodeRightClick,action);
+function EmitFromChild(
+	action: interfaceEmitsAction<{ menu: menuProps; treeNode: MindNode }>
+) {
+	emits(NameSpaceNodeOperate.NodeRightClick, action);
 }
 /* live hooks */
 watch(

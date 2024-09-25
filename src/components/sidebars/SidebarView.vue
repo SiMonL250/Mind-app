@@ -23,7 +23,7 @@ const Emits = defineEmits([NameSpaceOtherOperation.switchTool]);
 //event functions
 
 function itemClickEmit(toolType:toolTypes){
-    let action:interfaceEmitsAction = {
+    let action:interfaceEmitsAction<toolTypes> = {
         action:NameSpaceOtherOperation.switchTool,
         val:toolType
     }
@@ -36,7 +36,7 @@ function itemClickEmit(toolType:toolTypes){
 <style scoped lang="scss">
 .sidebar {
 	height: 100%;
-	width: 18%;
+	width: fit-content;
 	border-right: 1px solid var(--color-border-default);
     .sidebar-item{
         height: 46px;

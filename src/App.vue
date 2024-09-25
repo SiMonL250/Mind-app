@@ -7,20 +7,34 @@
 				@open-file="openFileHandle"
 				@save-file="saveFileHandle"
 				@create-file="createFileHandle"
-				@show-modal="showModalHandle"
+				@show-modal="
+					(action) => {
+						isShowModal = action?.val;
+					}
+				"
 				@node-action="nodeAction"
 			/>
 		</section>
-		<section class="main-section" @scroll="mainSectionScroll">
+		<section
+			class="main-section"
+			@scroll="
+				() => {
+					isMainScroll = !isMainScroll;
+				}
+			"
+		>
 			<treeChart
 				:node="MindFile.mindNode"
 				:treeRoot="MindFile.mindNode"
 				ref="treeChartRef"
 				:is-main-scroll="isMainScroll"
-				@node-right-click="NodeRightClick"
+				@node-right-click="TreeContextMenu"
 			/>
 		</section>
-		<Modal :show="isShowModal" @close-modal="closeModalHandle">
+		<Modal
+			:show="isShowModal"
+			@close-modal="(action:interfaceEmitsAction<boolean>)=>{isShowModal = action.val}"
+		>
 			<template #title>
 				<div>
 					<p>my tools box</p>
@@ -29,12 +43,13 @@
 			<template #body>
 				<Sidebar
 					:itemList="sidebarItemList"
-					@switch-tool="switchToolHandle"
+					@switch-tool="(action:interfaceEmitsAction<toolTypes>)=>{curTool = action.val}"
 				/>
 				<!-- TODO change Component -->
 				<div class="tool-component">{{ curTool }}</div>
 			</template>
 		</Modal>
+		{{ treeRightClickAction?.val?.menu?contextMenuOfTree(treeRightClickAction?.val?.menu):null }}
 	</div>
 </template>
 
@@ -55,6 +70,13 @@ import {
 import { FileStore } from "../src/store/MindFileStore";
 import { local, mindLocalKey } from "../src/hooks/localStorage.ts";
 import { sidebarProps, toolTypes } from "./interfaces/ComponentProperty";
+import { h } from "vue";
+import ContextMenu from "./components/selfUIs/contextMenu/ContextMenu.vue";
+import {
+	menuProps,
+	rightClickValType,
+} from "./components/selfUIs/contextMenu/contextMenu";
+
 /* defines and variables  */
 const instance = getCurrentInstance();
 const treeChartRef = ref(null);
@@ -78,7 +100,8 @@ const sidebarItemList: sidebarProps[] = [
 	},
 ];
 const curTool: Ref<toolTypes> = ref(toolTypes.CrcCheck);
-
+const treeRightClickAction: Ref<interfaceEmitsAction<rightClickValType>> =
+	ref(null);
 /* defines and variables  */
 /* Even handle function  */
 function changeMindNameHandle(newName: string): void {
@@ -107,28 +130,12 @@ function saveFileHandle() {
 function createFileHandle() {
 	handleNewAndSaveFile();
 }
-function nodeAction(action: interfaceEmitsAction) {
+function nodeAction(action: interfaceEmitsAction<string>) {
 	console.log("action :>> ", action);
 }
 
-function showModalHandle(action: interfaceEmitsAction) {
-	// console.log('action :>> ', action);
-	isShowModal.value = action?.val;
-}
-function closeModalHandle(action: interfaceEmitsAction) {
-	isShowModal.value = action.val;
-}
-function switchToolHandle(action: interfaceEmitsAction) {
-	console.log("action.val :>> ", action.val);
-	curTool.value = action.val;
-}
-
-function mainSectionScroll(){
-	isMainScroll.value = !isMainScroll.value
-}
-
-function NodeRightClick(action: interfaceEmitsAction){
-	console.log('App action :>> ', action);
+function TreeContextMenu(action: interfaceEmitsAction<rightClickValType>) {
+	treeRightClickAction.value = action;
 }
 /* Even handle function  */
 /* live Hooks  */
@@ -152,6 +159,14 @@ function storeAndMindInit() {
 	}
 }
 /* other functions  */
+const contextMenuOfTree = (menu: menuProps) => {
+	console.log("object :>> ", menu);
+	if (menu) {
+		return h(ContextMenu, {
+			menu: menu,
+		});
+	}
+};
 </script>
 
 <style lang="scss" scoped>

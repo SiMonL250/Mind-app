@@ -57,9 +57,9 @@ export enum EnumDirectoryWellknow {
 }
 /*ENUMS  END  */
 /*INTERFACE START  */ 
-export interface interfaceEmitsAction {
+export interface interfaceEmitsAction<T> {
 	action:string,
-	val?:any
+	val?:T
 }
 export interface mindFileContent {
 	reconicode: EnumReconiteCode;

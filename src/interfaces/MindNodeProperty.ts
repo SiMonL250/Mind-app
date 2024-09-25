@@ -8,6 +8,7 @@ export enum PriorytyLevel{
     medium='2',
     lower='3',
     lowest='4',
+    none='-1'
 }
 export type NodeIdType = string
 

@@ -200,7 +200,7 @@ function NodeAction(e: Event) {
 	//根据 e.target 判断 action 和 val
 
 	let target = e.target as HTMLElement;
-	let toEmit: interfaceEmitsAction = {
+	let toEmit: interfaceEmitsAction<string> = {
 		action: target.dataset["action"],
 		val: target.dataset["val"],
 	};
@@ -220,7 +220,7 @@ function saveFileClick(): void {
 	Emits(NameSpaceFileOperation.saveFile);
 }
 function showModalClick(): void { // emits modal show
-	let actions:interfaceEmitsAction = {
+	let actions:interfaceEmitsAction<boolean> = {
 		action:NameSpaceOtherOperation.showModal,
 		val:true
 	} 
@@ -277,9 +277,11 @@ $nodeOpWidth: calc(100% - $undoWidth - $insertWidth);
 			display: flex;
 			.file-operate-btn {
 				width: fit-content;
-				height: fit-content;
+				height: 40px;
+				max-height: 50px;
+				overflow: hidden;
 				font-size: 20px;
-				margin: 0 18px 0 0;
+				margin: 0 8px 0 0;
 				border: none;
 				background-color: white;
 				font-family: "consolas";
@@ -402,7 +404,7 @@ $nodeOpWidth: calc(100% - $undoWidth - $insertWidth);
 		border-bottom: 1px solid var(--color-border-default);
 	}
 }
-@media (max-width: 841px) {
+@media (max-width: 612px) {
 	.topbar {
 		.file-section {
 			.file-operate {
