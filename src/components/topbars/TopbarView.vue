@@ -110,13 +110,6 @@
 					>
 						{{ val }}
 					</button>
-					<button
-						class="items-btn"
-						:disabled="props.operateDisable"
-						:data-action="NameSpaceNodeOperate.setPriority"
-					>
-						#
-					</button>
 				</div>
 			</div>
 		</div>
@@ -277,11 +270,11 @@ $nodeOpWidth: calc(100% - $undoWidth - $insertWidth);
 			display: flex;
 			.file-operate-btn {
 				width: fit-content;
-				height: 40px;
-				max-height: 50px;
+				height: 36px;
+				max-height: 36px;
 				overflow: hidden;
-				font-size: 20px;
-				margin: 0 8px 0 0;
+				font-size: 17px;
+				margin: 0 12px 0 0;
 				border: none;
 				background-color: white;
 				font-family: "consolas";
@@ -301,7 +294,6 @@ $nodeOpWidth: calc(100% - $undoWidth - $insertWidth);
 	.nav-action {
 		display: flex;
 		height: calc(100% - $fileSectionHeight);
-		padding: 4px 0;
 		.nav-items {
 			border-right: 1px solid var(--color-border-insection);
 			padding: 0px 10px;
@@ -313,9 +305,8 @@ $nodeOpWidth: calc(100% - $undoWidth - $insertWidth);
 				padding: 4px;
 				box-sizing: border-box;
 				display: inline-flex;
-				align-items: flex-end;
+				align-items: center;
 				justify-content: center;
-				font-size: 15px;
 				border: none;
 				background-color: var(--color-topBar);
 				&:hover {

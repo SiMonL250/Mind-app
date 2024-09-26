@@ -15,12 +15,13 @@
 		"moduleDetection": "force",
 		"noEmit": true,
 		"jsx": "preserve",
-
+		"jsxImportSource": "vue",
 		/* Linting */
 		"strict": false,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noFallthroughCasesInSwitch": true,
+		
 
 		"types": [
 			"pinia-plugin-persist"

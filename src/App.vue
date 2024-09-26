@@ -26,9 +26,11 @@
 			<treeChart
 				:node="MindFile.mindNode"
 				:treeRoot="MindFile.mindNode"
-				ref="treeChartRef"
 				:is-main-scroll="isMainScroll"
-				@node-right-click="TreeContextMenu"
+				@node-right-click="(action:interfaceEmitsAction<rightClickValType>)=>{
+					treeRightClickAction = action;
+					showContextMenu = true;
+				}"
 			/>
 		</section>
 		<Modal
@@ -49,7 +51,10 @@
 				<div class="tool-component">{{ curTool }}</div>
 			</template>
 		</Modal>
-		{{ treeRightClickAction?.val?.menu?contextMenuOfTree(treeRightClickAction?.val?.menu):null }}
+		<ContextMenu
+			:menu="treeRightClickAction?.val.menu"
+			v-if="showContextMenu"
+		/>
 	</div>
 </template>
 
@@ -70,16 +75,11 @@ import {
 import { FileStore } from "../src/store/MindFileStore";
 import { local, mindLocalKey } from "../src/hooks/localStorage.ts";
 import { sidebarProps, toolTypes } from "./interfaces/ComponentProperty";
-import { h } from "vue";
 import ContextMenu from "./components/selfUIs/contextMenu/ContextMenu.vue";
-import {
-	menuProps,
-	rightClickValType,
-} from "./components/selfUIs/contextMenu/contextMenu";
+import { rightClickValType } from "./components/selfUIs/contextMenu/contextMenu";
 
 /* defines and variables  */
 const instance = getCurrentInstance();
-const treeChartRef = ref(null);
 interface localStoredType {
 	fileName: string;
 	fileContent: mindFileContent;
@@ -100,8 +100,17 @@ const sidebarItemList: sidebarProps[] = [
 	},
 ];
 const curTool: Ref<toolTypes> = ref(toolTypes.CrcCheck);
-const treeRightClickAction: Ref<interfaceEmitsAction<rightClickValType>> =
-	ref(null);
+const treeRightClickAction: Ref<interfaceEmitsAction<rightClickValType>> = ref({
+	action: "",
+	val: {
+		menu: {
+			position: { clientX: 0, clientY: 0 },
+			items: [],
+		},
+		treeNode: null,
+	},
+});
+const showContextMenu = ref(false);
 /* defines and variables  */
 /* Even handle function  */
 function changeMindNameHandle(newName: string): void {
@@ -134,9 +143,16 @@ function nodeAction(action: interfaceEmitsAction<string>) {
 	console.log("action :>> ", action);
 }
 
-function TreeContextMenu(action: interfaceEmitsAction<rightClickValType>) {
-	treeRightClickAction.value = action;
-}
+document.body.addEventListener("click", (e: PointerEvent) => {
+	hideContextMenu(e.target as Element);
+});
+document.body.addEventListener("contextmenu", (e: PointerEvent) => {
+	let target:Element = e.target as Element;
+	if(target.className == "menu-items"){
+		e.preventDefault();
+	}
+	hideContextMenu(target);
+});
 /* Even handle function  */
 /* live Hooks  */
 onMounted(() => {
@@ -158,15 +174,11 @@ function storeAndMindInit() {
 		fileStore.setfileContent(localContent.fileContent);
 	}
 }
+function hideContextMenu(target: Element) {
+	if (target.className == "treeNode" || target.className == "menu-items") return;
+	showContextMenu.value = false;
+}
 /* other functions  */
-const contextMenuOfTree = (menu: menuProps) => {
-	console.log("object :>> ", menu);
-	if (menu) {
-		return h(ContextMenu, {
-			menu: menu,
-		});
-	}
-};
 </script>
 
 <style lang="scss" scoped>

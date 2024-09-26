@@ -55,7 +55,10 @@ import {
 	NameSpaceNodeOperate,
 	interfaceEmitsAction,
 } from "../../hooks/operate";
-import { menuProps,rightClickValType } from "../selfUIs/contextMenu/contextMenu";
+import {
+	menuProps,
+	rightClickValType,
+} from "../selfUIs/contextMenu/contextMenu";
 //props and variables
 const treeProp = defineProps<{
 	node: MindNode;
@@ -72,10 +75,11 @@ window.addEventListener(
 	"resize",
 	() => {
 		line?.position();
+		//TODO 好像有bug？？
 	},
 	false
 );
-// TODO 节点右键菜单
+
 function rightClick(e: PointerEvent, node: MindNode) {
 	// console.log("e :>> ", e);
 	e.preventDefault();
@@ -89,9 +93,25 @@ function rightClick(e: PointerEvent, node: MindNode) {
 			},
 			items: [
 				{ id: "editText", text: "edit text" },
-				{ id: "insertChild", text: "insert child" },
-				{ id: "insertSibling", text: "insert sibling" },
-				{ id: "insertFather", text: "insert father" },
+				{ id: "delete", text: "delete" },
+				{
+					id: "insert",
+					text: "insert",
+					subMenu: [
+						{
+							id: 'child',
+							text: 'child',
+						},
+						{
+							id: 'father',
+							text: 'father',
+						},
+						{
+							id: 'sibling',
+							text: 'sibling',
+						},
+					],
+				},
 				{
 					id: "setPriority",
 					text: "priority",
@@ -123,7 +143,7 @@ function rightClick(e: PointerEvent, node: MindNode) {
 	let action: interfaceEmitsAction<{ menu: menuProps; treeNode: MindNode }> =
 		{
 			action: NameSpaceNodeOperate.NodeRightClick,
-			val: val, //TODO 把clientX和ClientY emit下去
+			val: val,
 		};
 	emits(NameSpaceNodeOperate.NodeRightClick, action);
 }
@@ -174,11 +194,11 @@ function drawByLeaderLine() {
 	let option: LeadLineOptions = {
 		startPlug: "disc",
 		endPlug: "disc",
-		size: 1,
+		size: 2,
 		startSocket: "bottom",
 		endSocket: "top",
-		color: "#ccc",
-		path: "straight",
+		color: "#bbb",
+		path: "fluid",
 	};
 	line = LeaderLine.setLine(
 		document.getElementById(childAndFatherProp.father.id),
@@ -198,6 +218,7 @@ $colorNodeBkg: #fafafa;
 	position: relative;
 	width: fit-content;
 	box-sizing: border-box;
+	user-select: none;
 }
 .parentLevel {
 	width: fit-content;
