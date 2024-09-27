@@ -42,7 +42,7 @@ function calcMenuPosition(newVal?: menuPosition) {
 	let menuHeight: number = (container.value as HTMLElement).offsetHeight;
 	let menuWidth: number = (container.value as HTMLElement).offsetWidth;
 	
-	console.log("{wH:windowHeight,wW:windowWidth} :>> ", {
+	console.log("W&H :>> ", {
 		wH: windowHeight,
 		wW: windowWidth,
 		mH: menuHeight,
