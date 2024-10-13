@@ -34,7 +34,7 @@
 			/>
 		</section>
 		<Modal
-			:show="isShowModal"
+			:show="/*isShowModal*/ true"
 			@close-modal="(action:interfaceEmitsAction<boolean>)=>{isShowModal = action.val}"
 		>
 			<template #title>
@@ -43,16 +43,24 @@
 				</div>
 			</template>
 			<template #body>
-				<Sidebar
+				<div class="side-bar">
+					<Sidebar
 					:itemList="sidebarItemList"
-					@switch-tool="(action:interfaceEmitsAction<toolTypes>)=>{curTool = action.val}"
+					@switch-tool="(action:interfaceEmitsAction<toolTypes>)=>{
+						curTool = action.val;
+
+					}"
 				/>
-				<!-- TODO change Component -->
-				<div class="tool-component">{{ curTool }}</div>
+				</div>
+				<!-- change Component --dynamic -->
+				<div class="tool-component">
+					<component :is="Components.get(curTool)"></component>
+				</div>
 			</template>
 		</Modal>
 		<ContextMenu
 			:menu="treeRightClickAction?.val.menu"
+			:treeNodeId="treeRightClickAction.val.treeNode.data.id"
 			v-if="showContextMenu"
 		/>
 	</div>
@@ -71,12 +79,12 @@ import {
 	handleNewAndSaveFile,
 	interfaceEmitsAction,
 } from "../src/hooks/operate";
-//import {getFatherNode} from "../src/interfaces/MindNodeProperty"
 import { FileStore } from "../src/store/MindFileStore";
 import { local, mindLocalKey } from "../src/hooks/localStorage.ts";
 import { sidebarProps, toolTypes } from "./interfaces/ComponentProperty";
 import ContextMenu from "./components/selfUIs/contextMenu/ContextMenu.vue";
 import { rightClickValType } from "./components/selfUIs/contextMenu/contextMenu";
+import { Components } from "./components/otherTools";
 
 /* defines and variables  */
 const instance = getCurrentInstance();
@@ -93,13 +101,14 @@ let MindFile = ref<mindFileContent>({
 });
 const isShowModal = ref(false);
 const sidebarItemList: sidebarProps[] = [
-	{ toolType: toolTypes.CrcCheck, innerText: "Crc Check" },
 	{
 		toolType: toolTypes.HexBinDecOct,
 		innerText: `${toolTypes.HexBinDecOct}`,
 	},
+	{ toolType: toolTypes.CrcCheck, innerText: "Crc Check" },
 ];
-const curTool: Ref<toolTypes> = ref(toolTypes.CrcCheck);
+const curTool: Ref<toolTypes> = ref(toolTypes.HexBinDecOct);
+
 const treeRightClickAction: Ref<interfaceEmitsAction<rightClickValType>> = ref({
 	action: "",
 	val: {
@@ -147,8 +156,8 @@ document.body.addEventListener("click", (e: PointerEvent) => {
 	hideContextMenu(e.target as Element);
 });
 document.body.addEventListener("contextmenu", (e: PointerEvent) => {
-	let target:Element = e.target as Element;
-	if(target.className == "menu-items"){
+	let target: Element = e.target as Element;
+	if (target.className == "menu-items") {
 		e.preventDefault();
 	}
 	hideContextMenu(target);
@@ -175,7 +184,10 @@ function storeAndMindInit() {
 	}
 }
 function hideContextMenu(target: Element) {
-	if (target.className == "treeNode" || target.className == "menu-items") return;
+	if (target.className == "treeNode") return;
+	if ((target as HTMLElement).dataset.hasSub === "true") {
+		return;
+	}
 	showContextMenu.value = false;
 }
 /* other functions  */
@@ -220,7 +232,32 @@ function hideContextMenu(target: Element) {
 		}
 	}
 }
+
+.side-bar{
+	width: 132px;
+}
 .tool-component {
+	width:calc(100% - 132px);
 	padding: 4px;
+	overflow: scroll;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+		background-color: #ffffff;
+	}
+	/*定义滚动条轨道
+ 内阴影+圆角*/
+	&::-webkit-scrollbar-track {
+		border-radius: 10px;
+		background-color: #ffffff;
+	}
+	/*定义滑块
+	 内阴影+圆角*/
+	&::-webkit-scrollbar-thumb {
+		border-radius: 10px;
+		-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+		background-color: #c9c9c9;
+	}
 }
 </style>

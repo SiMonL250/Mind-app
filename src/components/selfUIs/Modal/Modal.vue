@@ -52,7 +52,7 @@ watch(props,(newVal)=>{
     top: 0%;
     
     .modal-box{
-        width: 55vw;
+        width: 75vw;
         height: 78vh;
         background-color: rgb(243, 243, 243);
         border-radius: 8px;

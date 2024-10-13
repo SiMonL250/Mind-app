@@ -7,7 +7,7 @@
 			}"
 		>
 			<div
-				class="treeNode"
+				:class="{ treeNode: true}"
 				:id="node.data.id"
 				ref="curNodeEle"
 				@contextmenu="
@@ -16,6 +16,7 @@
 					}
 				"
 			>
+			<!-- TODO  focused  -->
 				{{ node.data.text }}
 			</div>
 		</div>
@@ -74,8 +75,13 @@ let childAndFatherProp: interfaceChildAndFatherProp;
 window.addEventListener(
 	"resize",
 	() => {
-		line?.position();
-		//TODO 好像有bug？？
+		try{
+			line?.position();
+		}catch(e){
+
+		}
+		
+		// 好像有bug？？
 	},
 	false
 );
@@ -84,7 +90,9 @@ function rightClick(e: PointerEvent, node: MindNode) {
 	// console.log("e :>> ", e);
 	e.preventDefault();
 	//emit to direct parent
-
+	function itemClick() {
+		console.log("itemClick :>> ");
+	}
 	let val: rightClickValType = {
 		menu: {
 			position: {
@@ -92,23 +100,26 @@ function rightClick(e: PointerEvent, node: MindNode) {
 				clientY: e.clientY,
 			},
 			items: [
-				{ id: "editText", text: "edit text" },
-				{ id: "delete", text: "delete" },
+				{ id: "editText", text: "edit text", clickEvent: itemClick },
+				{ id: "delete", text: "delete", clickEvent: itemClick },
 				{
 					id: "insert",
 					text: "insert",
 					subMenu: [
 						{
-							id: 'child',
-							text: 'child',
+							id: "child",
+							text: "child",
+							clickEvent: itemClick,
 						},
 						{
-							id: 'father',
-							text: 'father',
+							id: "father",
+							text: "father",
+							clickEvent: itemClick,
 						},
 						{
-							id: 'sibling',
-							text: 'sibling',
+							id: "sibling",
+							text: "sibling",
+							clickEvent: itemClick,
 						},
 					],
 				},
@@ -119,21 +130,33 @@ function rightClick(e: PointerEvent, node: MindNode) {
 						{
 							id: PriorytyLevel.highest,
 							text: PriorytyLevel.highest,
+							clickEvent: itemClick,
 						},
 						{
 							id: PriorytyLevel.higher,
 							text: PriorytyLevel.higher,
+							clickEvent: itemClick,
 						},
 						{
 							id: PriorytyLevel.medium,
 							text: PriorytyLevel.medium,
+							clickEvent: itemClick,
 						},
-						{ id: PriorytyLevel.lower, text: PriorytyLevel.lower },
+						{
+							id: PriorytyLevel.lower,
+							text: PriorytyLevel.lower,
+							clickEvent: itemClick,
+						},
 						{
 							id: PriorytyLevel.lowest,
 							text: PriorytyLevel.lowest,
+							clickEvent: itemClick,
 						},
-						{ id: PriorytyLevel.none, text: PriorytyLevel.none },
+						{
+							id: PriorytyLevel.none,
+							text: PriorytyLevel.none,
+							clickEvent: itemClick,
+						},
 					],
 				},
 			],
@@ -239,5 +262,8 @@ $colorNodeBkg: #fafafa;
 	padding: 5px;
 	background-color: $colorNodeBkg;
 	cursor: pointer;
+}
+.focused {
+	border-color: aqua;
 }
 </style>
