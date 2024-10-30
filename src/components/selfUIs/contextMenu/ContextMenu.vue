@@ -16,7 +16,7 @@
 				}
 				decideShowSub(item);
 				if(item.clickEvent){
-					item.clickEvent();
+					item.clickEvent(e /*,TODO　有callback可以在这里调用*/);
 				}
 			}"
 		>

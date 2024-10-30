@@ -90,8 +90,11 @@ function rightClick(e: PointerEvent, node: MindNode) {
 	// console.log("e :>> ", e);
 	e.preventDefault();
 	//emit to direct parent
-	function itemClick() {
-		console.log("itemClick :>> ");
+	function itemClick(e:PointerEvent,_callback?:()=>void) {
+		console.dir(e.target as HTMLElement);
+		if(_callback){
+			_callback.call(e.target as HTMLElement)
+		}
 	}
 	let val: rightClickValType = {
 		menu: {

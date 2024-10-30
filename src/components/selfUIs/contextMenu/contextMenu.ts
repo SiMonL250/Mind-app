@@ -7,7 +7,7 @@ export interface contextMenuItem {
 	id: itemIdType;
 	text: string;
 	subMenu?: Array<subMenu>;
-	clickEvent?: (e?: PointerEvent,clickAction?:interfaceEmitsAction<menuActionValType>) => void;
+	clickEvent?: (e?: PointerEvent,_callback?:(_emitAction?:interfaceEmitsAction<menuActionValType>)=>void) => void;
 }
 interface subMenu {
 	id: itemIdType;
