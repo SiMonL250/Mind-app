@@ -7,7 +7,7 @@
 			}"
 		>
 			<div
-				:class="{ treeNode: true}"
+				:class="{ treeNode: true,}"
 				:id="node.data.id"
 				ref="curNodeEle"
 				@contextmenu="
@@ -16,7 +16,7 @@
 					}
 				"
 			>
-			<!-- TODO  focused  -->
+			<!-- TODO  focused on node  -->
 				{{ node.data.text }}
 			</div>
 		</div>

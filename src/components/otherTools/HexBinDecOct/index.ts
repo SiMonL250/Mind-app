@@ -1,5 +1,3 @@
-
-
 export const EventInput: string = "input";
 export type TypeScale = "decimal" | "hexadecimal" | "binary" | "octonary" | "IEEE_float";
 

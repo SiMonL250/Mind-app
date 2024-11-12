@@ -2,7 +2,7 @@ import { interfaceEmitsAction } from "../../../hooks/operate";
 import { MindNode } from "../../../interfaces/MindNodeProperty";
 
 export type itemIdType = string;
-export type menuActionValType = any;//TODO any else
+export type menuActionValType = any;
 export interface contextMenuItem {
 	id: itemIdType;
 	text: string;

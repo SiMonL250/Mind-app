@@ -35,7 +35,7 @@
 			<!-- TODO 浮动的输入框，以更改节点文字 -->
 		</section>
 		<Modal
-			:show="/*isShowModal*/ true"
+			:show="/*true*/ isShowModal"
 			@close-modal="(action:interfaceEmitsAction<boolean>)=>{isShowModal = action.val}"
 		>
 			<template #title>
@@ -213,24 +213,6 @@ function hideContextMenu(target: Element) {
 		padding: 5px 13px 0 13px;
 		box-sizing: border-box;
 		overflow: scroll;
-		&::-webkit-scrollbar {
-			width: 6px;
-			height: 6px;
-			background-color: #ffffff;
-		}
-		/*定义滚动条轨道
-	 内阴影+圆角*/
-		&::-webkit-scrollbar-track {
-			border-radius: 10px;
-			background-color: #ffffff;
-		}
-		/*定义滑块
-		 内阴影+圆角*/
-		&::-webkit-scrollbar-thumb {
-			border-radius: 10px;
-			-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-			background-color: #c9c9c9;
-		}
 	}
 }
 
@@ -242,23 +224,5 @@ function hideContextMenu(target: Element) {
 	padding: 4px;
 	overflow: scroll;
 
-	&::-webkit-scrollbar {
-		width: 6px;
-		height: 6px;
-		background-color: #ffffff;
-	}
-	/*定义滚动条轨道
- 内阴影+圆角*/
-	&::-webkit-scrollbar-track {
-		border-radius: 10px;
-		background-color: #ffffff;
-	}
-	/*定义滑块
-	 内阴影+圆角*/
-	&::-webkit-scrollbar-thumb {
-		border-radius: 10px;
-		-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-		background-color: #c9c9c9;
-	}
 }
 </style>

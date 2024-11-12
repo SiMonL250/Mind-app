@@ -1,5 +1,5 @@
-type scales = 2 | 8 | 16 | 10;
-type typeBitLength = 64 | 32 | 16 | 8;
+export type scales = 2 | 8 | 16 | 10;
+export type typeBitLength = 64 | 32 | 16 | 8;
 type scaleFunc = (raw: string, bits: typeBitLength, s?: scales) => string;
 
 export namespace bitLength {
@@ -90,6 +90,32 @@ export const decimalToOther: scaleFunc = function (
 		}
 		return numArr.map((i) => scaleCharsHashArray[i]);
 	}
+	function decideBinaryArrayBitsAccount(
+		arr: binaryArray,
+		len: typeBitLength,
+		minus: boolean
+	) :binaryArray{
+		// 正补0，负补1；弃就直接切割，不管正负
+		let l = arr.length;
+		if(l>len){
+			//截取
+			return arr.splice(l-len,l);
+		}
+		else if(l<len){
+			let addedOnes: binaryArray;
+			if(minus){
+				addedOnes = new Array(len - l).fill("1");
+			}
+			else{
+				addedOnes = new Array(len - l).fill("0");
+			}
+			arr.unshift(...addedOnes);
+			return arr ;
+		}
+		else{
+			return arr;
+		}
+	}
 	let groupItemCounts: number;
 	switch (
 		s //only 2**n 进制
@@ -105,19 +131,28 @@ export const decimalToOther: scaleFunc = function (
 			break;
 	}
 
-	let signedInt = parseInt(raw);
-	//TODO 负数转换 这里错了
-	let repairBit = "0";
-	if (signedInt < 0) {
-		signedInt = 2 ** bits + signedInt;
-		repairBit = "1";
+	let signedBitString = parseInt(raw).toString(2);
+	let minus: boolean = false;
+
+	if (signedBitString[0] == "-") {
+		minus = true;
+		signedBitString = signedBitString.replace(/^\-/, "1");
 	}
-	let signedBitString: string = signedInt.toString(2);
-	while (signedBitString.length < bits) {
-		signedBitString = repairBit + signedBitString;
-	}
-	// console.log('signedBitString :>> ', signedBitString);
+
 	let singedBitArray: binaryArray = signedBitString.split("") as binaryArray;
+	if (minus) {//取反 补码
+		let lastOne = signedBitString.lastIndexOf("1");
+		for (let i = 1; i < lastOne; i++) {
+			singedBitArray[i] = singedBitArray[i] === "0" ? "1" : "0";
+		}
+	}
+
+	//四、双、单字，还是字节（单字 = 2字节 = 16位）
+	//singedBitArray 扔进去，多弃少补
+	singedBitArray = decideBinaryArrayBitsAccount(singedBitArray, bits, minus);
+
+	console.log("singedBitArray :>> ", singedBitArray);
+
 	let bit2DArr = divideArray(singedBitArray, groupItemCounts);
 
 	let scaledArray: Array<string> = chunksToScaleCharsArray(bit2DArr);
@@ -126,7 +161,7 @@ export const decimalToOther: scaleFunc = function (
 
 ///IEEE float 32 bits
 export const decimalToIEEE: scaleFunc = function (raw: string) {
-	let decimal: number = parseInt(raw, 10);
+	let decimal: number = parseFloat(raw);
 	if (decimal < Number.MIN_SAFE_INTEGER || decimal > Number.MAX_SAFE_INTEGER)
 		return;
 	return "";
