@@ -7,7 +7,10 @@
 			}"
 		>
 			<div
-				:class="{ treeNode: true,}"
+				:class="{
+					treeNode: true,
+					
+				}"
 				:id="node.data.id"
 				ref="curNodeEle"
 				@contextmenu="
@@ -16,7 +19,7 @@
 					}
 				"
 			>
-			<!-- TODO  focused on node  -->
+				<!-- TODO  focused on node  -->
 				{{ node.data.text }}
 			</div>
 		</div>
@@ -59,7 +62,7 @@ import {
 import {
 	menuProps,
 	rightClickValType,
-} from "../selfUIs/contextMenu/contextMenu";
+} from "../selfUIs/ContextMenu/contextMenu";
 //props and variables
 const treeProp = defineProps<{
 	node: MindNode;
@@ -75,12 +78,10 @@ let childAndFatherProp: interfaceChildAndFatherProp;
 window.addEventListener(
 	"resize",
 	() => {
-		try{
+		try {
 			line?.position();
-		}catch(e){
+		} catch (e) {}
 
-		}
-		
 		// 好像有bug？？
 	},
 	false
@@ -90,10 +91,10 @@ function rightClick(e: PointerEvent, node: MindNode) {
 	// console.log("e :>> ", e);
 	e.preventDefault();
 	//emit to direct parent
-	function itemClick(e:PointerEvent,_callback?:()=>void) {
-		console.dir(e.target as HTMLElement);
-		if(_callback){
-			_callback.call(e.target as HTMLElement)
+	function itemClick(e: PointerEvent, _callback?: () => void) {
+		//console.dir(e.target as HTMLElement);
+		if (_callback) {
+			_callback.call(e.target as HTMLElement);
 		}
 	}
 	let val: rightClickValType = {
@@ -103,8 +104,18 @@ function rightClick(e: PointerEvent, node: MindNode) {
 				clientY: e.clientY,
 			},
 			items: [
-				{ id: "editText", text: "edit text", clickEvent: itemClick },
-				{ id: "delete", text: "delete", clickEvent: itemClick },
+				{
+					id: "editText",
+					text: "edit text",
+					action: "edit-text",
+					clickEvent: itemClick,
+				},
+				{
+					id: "delete",
+					text: "delete",
+					action: "delete-node",
+					clickEvent: itemClick,
+				},
 				{
 					id: "insert",
 					text: "insert",
@@ -112,16 +123,19 @@ function rightClick(e: PointerEvent, node: MindNode) {
 						{
 							id: "child",
 							text: "child",
+							action: "insert-child",
 							clickEvent: itemClick,
 						},
 						{
 							id: "father",
 							text: "father",
+							action: "insert-parent",
 							clickEvent: itemClick,
 						},
 						{
 							id: "sibling",
 							text: "sibling",
+							action: "insert-sibling",
 							clickEvent: itemClick,
 						},
 					],
@@ -133,31 +147,43 @@ function rightClick(e: PointerEvent, node: MindNode) {
 						{
 							id: PriorytyLevel.highest,
 							text: PriorytyLevel.highest,
+							action: "set-priority",
+							priority: PriorytyLevel.highest,
 							clickEvent: itemClick,
 						},
 						{
 							id: PriorytyLevel.higher,
 							text: PriorytyLevel.higher,
+							action: "set-priority",
+							priority: PriorytyLevel.higher,
 							clickEvent: itemClick,
 						},
 						{
 							id: PriorytyLevel.medium,
 							text: PriorytyLevel.medium,
+							action: "set-priority",
+							priority: PriorytyLevel.medium,
 							clickEvent: itemClick,
 						},
 						{
 							id: PriorytyLevel.lower,
 							text: PriorytyLevel.lower,
+							action: "set-priority",
+							priority: PriorytyLevel.lower,
 							clickEvent: itemClick,
 						},
 						{
 							id: PriorytyLevel.lowest,
 							text: PriorytyLevel.lowest,
+							action: "set-priority",
+							priority: PriorytyLevel.lowest,
 							clickEvent: itemClick,
 						},
 						{
 							id: PriorytyLevel.none,
 							text: PriorytyLevel.none,
+							action: "set-priority",
+							priority: PriorytyLevel.none,
 							clickEvent: itemClick,
 						},
 					],
@@ -165,6 +191,7 @@ function rightClick(e: PointerEvent, node: MindNode) {
 			],
 		},
 		treeNode: node,
+		target:e.target as HTMLElement,
 	};
 	let action: interfaceEmitsAction<{ menu: menuProps; treeNode: MindNode }> =
 		{

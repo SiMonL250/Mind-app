@@ -28,14 +28,18 @@
 				:treeRoot="MindFile.mindNode"
 				:is-main-scroll="isMainScroll"
 				@node-right-click="(action:interfaceEmitsAction<rightClickValType>)=>{
+					console.log('action :>> ', action.val.target);
+					//用action.val.target 修改class 更改样式
 					treeRightClickAction = action;
 					showContextMenu = true;
+					focusStore.focusedNode = action.val.treeNode;
 				}"
 			/>
 			<!-- TODO 浮动的输入框，以更改节点文字 -->
+			<!-- TODO focused node 特殊显示 -->
 		</section>
 		<Modal
-			:show="/*true*/ isShowModal"
+			:show="isShowModal "
 			@close-modal="(action:interfaceEmitsAction<boolean>)=>{isShowModal = action.val}"
 		>
 			<template #title>
@@ -46,12 +50,12 @@
 			<template #body>
 				<div class="side-bar">
 					<Sidebar
-					:itemList="sidebarItemList"
-					@switch-tool="(action:interfaceEmitsAction<toolTypes>)=>{
+						:itemList="sidebarItemList"
+						@switch-tool="(action:interfaceEmitsAction<toolTypes>)=>{
 						curTool = action.val;
 
 					}"
-				/>
+					/>
 				</div>
 				<!-- change Component --dynamic -->
 				<div class="tool-component">
@@ -63,7 +67,15 @@
 			:menu="treeRightClickAction?.val.menu"
 			:treeNodeId="treeRightClickAction.val.treeNode.data.id"
 			v-if="showContextMenu"
+			@context-menu-item-click="contextMenuItemClickHandleFunc"
 		/>
+		<FloatInputBlank
+		:floatInputProperty="{
+			position: { clientX: 0, clientY: 0 },
+			text: '',
+			isShow: true,
+		}"
+	></FloatInputBlank>
 	</div>
 </template>
 
@@ -72,6 +84,7 @@ import TopbarView from "./components/topbars/TopbarView.vue";
 import treeChart from "./components/treeChart/treeChart.vue";
 import Modal from "./components/selfUIs/Modal/Modal.vue";
 import Sidebar from "./components/sidebars/SidebarView.vue";
+
 import { ref, getCurrentInstance, onMounted, Ref } from "vue";
 import {
 	EnumReconiteCode,
@@ -81,10 +94,16 @@ import {
 	interfaceEmitsAction,
 } from "../src/hooks/operate";
 import { FileStore } from "../src/store/MindFileStore";
+import { focusNodeStore } from "./store/focusNodStore";
 import { local, mindLocalKey } from "../src/hooks/localStorage.ts";
 import { sidebarProps, toolTypes } from "./interfaces/ComponentProperty";
-import ContextMenu from "./components/selfUIs/contextMenu/ContextMenu.vue";
-import { rightClickValType } from "./components/selfUIs/contextMenu/contextMenu";
+import ContextMenu from "./components/selfUIs/ContextMenu/ContextMenu.vue";
+import FloatInputBlank from "./components/selfUIs/FloatInputBlank/FloatInputBlank.vue";
+import {
+	menuItemClickActionValType,
+	rightClickValType,
+	typeItemClickAction,
+} from "./components/selfUIs/ContextMenu/contextMenu";
 import { Components } from "./components/otherTools";
 
 /* defines and variables  */
@@ -93,7 +112,9 @@ interface localStoredType {
 	fileName: string;
 	fileContent: mindFileContent;
 }
+//pinia store
 const fileStore = FileStore();
+const focusStore = focusNodeStore();
 const isMainScroll = ref(false);
 let MindFile = ref<mindFileContent>({
 	reconicode: EnumReconiteCode.MindJson,
@@ -191,6 +212,33 @@ function hideContextMenu(target: Element) {
 	}
 	showContextMenu.value = false;
 }
+function contextMenuItemClickHandleFunc(itemClickAction: typeItemClickAction) {
+	console.log("itemClickAction :>> ", itemClickAction);
+	let nodeAction: menuItemClickActionValType = itemClickAction.val;
+	if (nodeAction) {
+		switch (nodeAction) {
+			case "edit-text":
+				break;
+
+			case "delete-node":
+				break;
+
+			case "set-priority":
+				break;
+
+			case "insert-child":
+				break;
+
+			case "insert-parent":
+				break;
+
+			case "insert-sibling":
+				break;
+			default:
+				break;
+		}
+	}
+}
 /* other functions  */
 </script>
 
@@ -216,13 +264,12 @@ function hideContextMenu(target: Element) {
 	}
 }
 
-.side-bar{
+.side-bar {
 	width: 132px;
 }
 .tool-component {
-	width:calc(100% - 132px);
+	width: calc(100% - 132px);
 	padding: 4px;
 	overflow: scroll;
-
 }
 </style>

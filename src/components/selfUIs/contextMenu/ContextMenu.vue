@@ -8,15 +8,16 @@
 			class="menu-items"
 			v-for="(item, ind) of props.menu.items"
 			:key="ind"
-			:data-has-sub = "item.subMenu?true:false"
+			:data-has-sub="item.subMenu ? true : false"
 			@click="(e:PointerEvent)=>{
 				itemClick = {
 					clientX : e.clientX,
 					clientY : e.clientY,
 				}
+				itemClickAction.val = item.action ?? 'none';
 				decideShowSub(item);
 				if(item.clickEvent){
-					item.clickEvent(e /*,TODO　有callback可以在这里调用*/);
+					item.clickEvent(e ,()=>itemClickCallbackFunc(itemClickAction)/*,　有callback可以在这里调用*/);
 				}
 			}"
 		>
@@ -34,11 +35,14 @@
 			>
 				<div
 					class="submenu-item"
-					v-for="(i, ind) of item.subMenu"
+					v-for="(subOfItem, ind) of item.subMenu"
 					:key="ind"
-					@click="i.clickEvent"
+					@click="(e:PointerEvent)=>{
+						itemClickAction.val = subOfItem.action ?? 'none';
+						subOfItem.clickEvent(e,()=>itemClickCallbackFunc(itemClickAction))
+					}"
 				>
-					{{ i.text }}
+					{{ subOfItem.text }}
 				</div>
 			</div>
 		</div>
@@ -47,18 +51,27 @@
 
 <script setup lang="ts">
 import { CSSProperties, onMounted, ref, Ref, watch } from "vue";
-import { menuProps, contextMenuItem } from "./contextMenu";
+import { menuProps, interfaceContextMenuItem,typeItemClickCallback, typeItemClickAction } from "./ContextMenu";
 import { nextTick } from "vue";
-const showSubMenu = ref({ menuItemId: "", show: false });
+
+const itemClickActionStr:string = "context-menu-item-click";
 const props = defineProps<{
 	menu: menuProps;
-	treeNodeId:string
+	treeNodeId: string;
 }>();
+
+const contextMenuEmits = defineEmits([itemClickActionStr])
+
+const showSubMenu = ref({ menuItemId: "", show: false });
 const container = ref(null);
 const subMenu = ref(null);
 const itemClick = ref({ clientX: 0, clientY: 0 });
 const menuStyleClass: Ref<CSSProperties> = ref({
 	position: "absolute",
+});
+const itemClickAction: Ref<typeItemClickAction> = ref({
+	action: itemClickActionStr,
+	val: 'none',
 });
 const subMenuStyleClass: Ref<CSSProperties> = ref({});
 watch(
@@ -67,16 +80,25 @@ watch(
 		calcMenuPosition();
 	}
 );
-watch(()=>props.treeNodeId,(n,o)=>{
-	if(n!=o){
-		showSubMenu.value.show = false
+watch(
+	() => props.treeNodeId,
+	(n, o) => {
+		if (n != o) {
+			showSubMenu.value.show = false;
+		}
 	}
-})
+);
 onMounted(() => {
 	calcMenuPosition();
 });
 
-function decideShowSub(item: contextMenuItem) {
+const  itemClickCallbackFunc:typeItemClickCallback=(_emitAction: typeItemClickAction)=> {
+	//callback 要把操作emit到App.vue
+	// console.log("param :>> ", _emitAction);
+	contextMenuEmits(itemClickActionStr,_emitAction);
+}
+
+function decideShowSub(item: interfaceContextMenuItem) {
 	if (item.subMenu) {
 		if (item.id == showSubMenu.value.menuItemId)
 			showSubMenu.value.show = !showSubMenu.value.show;

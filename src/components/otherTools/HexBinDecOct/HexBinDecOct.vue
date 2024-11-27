@@ -1,7 +1,6 @@
 <template>
 	<div class="scale-container">
 		<div class="bitlength-select" >
-			<!-- TODO Q/D/Word/Byte select -->
 			<div
 				v-for="(item, ind) of bitLengthList"
 				:key="ind"
@@ -41,6 +40,8 @@ import {
 	bitLength,
 	namespaceScales,
 	typeBitLength,
+decimalToIEEE,
+HexadecimalToOther,
 } from "../../../hooks/ScaleCalc";
 const sList: Ref<Array<interfaceScaleListItem>> = ref([
 	{
@@ -105,6 +106,7 @@ const sList: Ref<Array<interfaceScaleListItem>> = ref([
 	},
 ]);
 interface bitlenInterface { text: string; bits: typeBitLength };
+
 const bitLengthList: Ref<Array<bitlenInterface>> = ref([
 	{ text: "Byte", bits: bitLength.Byte },
 	{ text: "Word", bits: bitLength.Word },
@@ -112,7 +114,7 @@ const bitLengthList: Ref<Array<bitlenInterface>> = ref([
 	{ text: "QWord", bits: bitLength.QWord },
 ]);
 const selectBitlength: Ref<typeBitLength> = ref(bitLength.QWord);
-
+const CurrentInput:Ref<interfaceScaleListItem> = ref(sList.value[0])
 const debounced = debounce(EventHandle);
 
 function valMatchRex(rex: RegExp, val: string): boolean {
@@ -160,15 +162,21 @@ function convertToOtherScaleAndSetVal(val: string, curScaleType: TypeScale) {
 	console.log("curSType :>> ", curScaleType);
 	switch (curScaleType) {
 		case "decimal":
-			console.log(
-				" hexadecimal:>> ",
-				decimalToOther(val, selectBitlength.value, namespaceScales.Hexadecimal)
-			);
+			(this[1] as interfaceScaleListItem).val = decimalToOther(val, selectBitlength.value, namespaceScales.Hexadecimal);
+			(this[2] as interfaceScaleListItem).val = decimalToOther(val, selectBitlength.value, namespaceScales.Binary);
+			(this[3] as interfaceScaleListItem).val = decimalToOther(val, selectBitlength.value, namespaceScales.Octonary);
+			(this[4] as interfaceScaleListItem).val = decimalToIEEE(val);
+			CurrentInput.value = this[0] as interfaceScaleListItem;
+			//TODO 填充新值
 			//dec to hex bin oct float
 			break;
 		case "binary":
 			break;
 		case "hexadecimal":
+			(this[0] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.Decimal);
+			(this[2] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.Binary);
+			(this[3] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.Octonary);
+			(this[4] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.IEEE_754);
 			break;
 		case "octonary":
 			break;

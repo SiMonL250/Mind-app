@@ -14,6 +14,7 @@ export const focusNodeStore: StoreDefinition<
 	},
 	{
         setText:(newText:string)=>void;
+		setPriority:(newPriority:PriorytyLevel)=>void;
     }
 > = defineStore("focused-node", {
 	state: () => {
@@ -37,10 +38,14 @@ export const focusNodeStore: StoreDefinition<
 	},
     actions:{
         setText(newText:string) {
-            if(this.focusNode){
-                (this.focusNode as MindNode).data.text = newText; 
+            if(this.focusedNode){
+                (this.focusedNode as MindNode).data.text = newText; 
             }
         },
-        
-    }
+        setPriority(newPriority:PriorytyLevel){
+			if(this.focusedNode){
+                (this.focusedNode as MindNode).data.text = newPriority; 
+            }
+		}
+    },
 });
