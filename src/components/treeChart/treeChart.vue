@@ -49,9 +49,8 @@ import treeChart from "./treeChart.vue";
 import {
 	MindNode,
 	getFatherNode,
-	PriorytyLevel,
 } from "../../interfaces/MindNodeProperty";
-import { interfaceChildAndFatherProp, LeadLineOptions } from "./tree";
+import { interfaceChildAndFatherProp, LeadLineOptions, typeTreeNodeRightClickValType } from "./tree";
 import { ref, onMounted, onUnmounted } from "vue";
 import LeaderLine from "leader-line-vue";
 import { watch } from "vue";
@@ -61,7 +60,6 @@ import {
 } from "../../hooks/operate";
 import {
 	menuProps,
-	rightClickValType,
 } from "../selfUIs/ContextMenu/contextMenu";
 //props and variables
 const treeProp = defineProps<{
@@ -91,109 +89,13 @@ function rightClick(e: PointerEvent, node: MindNode) {
 	// console.log("e :>> ", e);
 	e.preventDefault();
 	//emit to direct parent
-	function itemClick(e: PointerEvent, _callback?: () => void) {
-		//console.dir(e.target as HTMLElement);
-		if (_callback) {
-			_callback.call(e.target as HTMLElement);
-		}
-	}
-	let val: rightClickValType = {
-		menu: {
-			position: {
-				clientX: e.clientX,
-				clientY: e.clientY,
-			},
-			items: [
-				{
-					id: "editText",
-					text: "edit text",
-					action: "edit-text",
-					clickEvent: itemClick,
-				},
-				{
-					id: "delete",
-					text: "delete",
-					action: "delete-node",
-					clickEvent: itemClick,
-				},
-				{
-					id: "insert",
-					text: "insert",
-					subMenu: [
-						{
-							id: "child",
-							text: "child",
-							action: "insert-child",
-							clickEvent: itemClick,
-						},
-						{
-							id: "father",
-							text: "father",
-							action: "insert-parent",
-							clickEvent: itemClick,
-						},
-						{
-							id: "sibling",
-							text: "sibling",
-							action: "insert-sibling",
-							clickEvent: itemClick,
-						},
-					],
-				},
-				{
-					id: "setPriority",
-					text: "priority",
-					subMenu: [
-						{
-							id: PriorytyLevel.highest,
-							text: PriorytyLevel.highest,
-							action: "set-priority",
-							priority: PriorytyLevel.highest,
-							clickEvent: itemClick,
-						},
-						{
-							id: PriorytyLevel.higher,
-							text: PriorytyLevel.higher,
-							action: "set-priority",
-							priority: PriorytyLevel.higher,
-							clickEvent: itemClick,
-						},
-						{
-							id: PriorytyLevel.medium,
-							text: PriorytyLevel.medium,
-							action: "set-priority",
-							priority: PriorytyLevel.medium,
-							clickEvent: itemClick,
-						},
-						{
-							id: PriorytyLevel.lower,
-							text: PriorytyLevel.lower,
-							action: "set-priority",
-							priority: PriorytyLevel.lower,
-							clickEvent: itemClick,
-						},
-						{
-							id: PriorytyLevel.lowest,
-							text: PriorytyLevel.lowest,
-							action: "set-priority",
-							priority: PriorytyLevel.lowest,
-							clickEvent: itemClick,
-						},
-						{
-							id: PriorytyLevel.none,
-							text: PriorytyLevel.none,
-							action: "set-priority",
-							priority: PriorytyLevel.none,
-							clickEvent: itemClick,
-						},
-					],
-				},
-			],
-		},
+
+	let val: typeTreeNodeRightClickValType = {
+		position:{clientX:e.clientX,clientY:e.clientY},
 		treeNode: node,
 		target:e.target as HTMLElement,
 	};
-	let action: interfaceEmitsAction<{ menu: menuProps; treeNode: MindNode }> =
+	let action: interfaceEmitsAction<{treeNode: MindNode }> =
 		{
 			action: NameSpaceNodeOperate.NodeRightClick,
 			val: val,

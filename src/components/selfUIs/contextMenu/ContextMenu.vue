@@ -14,10 +14,9 @@
 					clientX : e.clientX,
 					clientY : e.clientY,
 				}
-				itemClickAction.val = item.action ?? 'none';
 				decideShowSub(item);
 				if(item.clickEvent){
-					item.clickEvent(e ,()=>itemClickCallbackFunc(itemClickAction)/*,　有callback可以在这里调用*/);
+					item.clickEvent(e ,()=>itemClickCallbackFunc(item.action)/*,　有callback可以在这里调用*/);
 				}
 			}"
 		>
@@ -38,8 +37,7 @@
 					v-for="(subOfItem, ind) of item.subMenu"
 					:key="ind"
 					@click="(e:PointerEvent)=>{
-						itemClickAction.val = subOfItem.action ?? 'none';
-						subOfItem.clickEvent(e,()=>itemClickCallbackFunc(itemClickAction))
+						subOfItem.clickEvent(e,()=>itemClickCallbackFunc(subOfItem.action))
 					}"
 				>
 					{{ subOfItem.text }}
@@ -51,12 +49,14 @@
 
 <script setup lang="ts">
 import { CSSProperties, onMounted, ref, Ref, watch } from "vue";
-import { menuProps, interfaceContextMenuItem,typeItemClickCallback, typeItemClickAction } from "./ContextMenu";
+import { menuProps, interfaceContextMenuItem,typeItemClickCallback, typeItemClickAction } from "./contextMenu";
 import { nextTick } from "vue";
+import { interfacePosition } from "../../../interfaces/ComponentProperty";
 
 const itemClickActionStr:string = "context-menu-item-click";
 const props = defineProps<{
 	menu: menuProps;
+	position:interfacePosition
 	treeNodeId: string;
 }>();
 
@@ -69,13 +69,11 @@ const itemClick = ref({ clientX: 0, clientY: 0 });
 const menuStyleClass: Ref<CSSProperties> = ref({
 	position: "absolute",
 });
-const itemClickAction: Ref<typeItemClickAction> = ref({
-	action: itemClickActionStr,
-	val: 'none',
-});
+
+
 const subMenuStyleClass: Ref<CSSProperties> = ref({});
 watch(
-	() => props.menu.position,
+	() => props.position,
 	(_new, _old) => {
 		calcMenuPosition();
 	}
@@ -94,7 +92,7 @@ onMounted(() => {
 
 const  itemClickCallbackFunc:typeItemClickCallback=(_emitAction: typeItemClickAction)=> {
 	//callback 要把操作emit到App.vue
-	// console.log("param :>> ", _emitAction);
+	//  console.log("param :>> ", _emitAction);
 	contextMenuEmits(itemClickActionStr,_emitAction);
 }
 
@@ -120,8 +118,8 @@ function calcMenuPosition() {
 	let windowHeight: number = document.documentElement.clientHeight;
 	let menuHeight: number = (container.value as HTMLElement).offsetHeight;
 	let menuWidth: number = (container.value as HTMLElement).offsetWidth;
-	let clientX = props.menu.position.clientX;
-	let clientY = props.menu.position.clientY;
+	let clientX = props.position.clientX;
+	let clientY = props.position.clientY;
 
 	let showX =
 		menuWidth + clientX >= windowWidth - 10 ? clientX - menuWidth : clientX;

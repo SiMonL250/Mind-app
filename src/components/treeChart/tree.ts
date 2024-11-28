@@ -1,4 +1,5 @@
-import { NodeIdType } from "../../interfaces/MindNodeProperty";
+import { MindNode, NodeIdType } from "../../interfaces/MindNodeProperty";
+import { menuPosition } from "../selfUIs/ContextMenu/contextMenu";
 
 interface interfaceNodePos {
 	id: NodeIdType;
@@ -84,3 +85,6 @@ export interface LeadLineOptions {
 	dropShadow?:boolean|dropShadowObject,
 
 }
+
+
+export type typeTreeNodeRightClickValType = {position:menuPosition; treeNode: MindNode; target?:HTMLElement};

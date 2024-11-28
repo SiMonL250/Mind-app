@@ -1,12 +1,8 @@
+import { interfacePosition } from '../../../interfaces/ComponentProperty';
 import { interfaceEmitsAction } from './../../../hooks/operate';
 
-export interface interfaceInputPosition{
-    clientX: number;
-	clientY: number;
-}
-
 export interface interfaceFloatInputProperty{
-    position: interfaceInputPosition;
+    position: interfacePosition;
     text:string;
     isShow:boolean;
 }

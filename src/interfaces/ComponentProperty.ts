@@ -7,7 +7,10 @@ export enum buttonType{
     showModal = 'showModal',
     showTools = 'showTools'
 }
-
+export interface interfacePosition {
+	clientX: number;
+	clientY: number;
+}
 export enum toolTypes{
     CrcCheck='CrcCheck',
     HexBinDecOct='HexBinDecOct',

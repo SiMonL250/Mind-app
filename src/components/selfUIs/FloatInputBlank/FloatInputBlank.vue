@@ -15,24 +15,30 @@
 <script setup lang="ts">
 import { CSSProperties, Ref, ref } from "vue";
 import { interfaceFloatInputProperty } from "./floatInputBlank";
-import { onMounted } from "vue";
+import { onMounted,watch } from "vue";
 const props = defineProps<{
 	floatInputProperty: interfaceFloatInputProperty;
 }>();
 const inputBlankEmit = defineEmits([]);
 const inputWidth: Ref<number> = ref(120);
-//	menuStyleClass.value.top = `${showY}px`;
-// menuStyleClass.value.left = `${showX}px`;
+
 const styleProp: Ref<CSSProperties> = ref({
 	position: "absolute",
 	width: `${inputWidth.value}px`,
-	top: "134px",
-	left: "400px",
+	top: `${props.floatInputProperty.position.clientX}px`,
+	left: `${props.floatInputProperty.position.clientY}px`,
 });
 //hooks
 onMounted(()=>{
-
 })
+watch(
+	() => props.floatInputProperty.position,
+	(_new, _old) => {
+		console.log('_new :>> ', _new); //set position to new pos
+		console.log('_old :>> ', _old);
+		calcPosition();
+	}
+);
 //functions
 function autoResize(e: InputEvent) {
 	let textarea = e.target as HTMLTextAreaElement;
@@ -42,6 +48,10 @@ function autoResize(e: InputEvent) {
 }
 
 function abortEditClickHandleFunc() {}
+
+function calcPosition(){
+
+}
 </script>
 
 <style scoped lang="scss">

@@ -1,9 +1,8 @@
 import { PriorytyLevel } from "./../../../interfaces/MindNodeProperty";
 import { interfaceEmitsAction } from "../../../hooks/operate";
-import { MindNode } from "../../../interfaces/MindNodeProperty";
 
 export type typeItemId = string;
-export type menuItemClickActionValType =
+export type typeNextActionTodo =
 	| "insert-child"
 	| "insert-parent"
 	| "insert-sibling"
@@ -11,8 +10,13 @@ export type menuItemClickActionValType =
 	| "delete-node"
 	| "set-priority"
 	|"none";
+export interface interfaceMenuItemClickActionValType{
+	someString?:string,
+	someObject?:object,
+	someNumber?:number,
+}
 export type typeItemClickAction =
-	interfaceEmitsAction<menuItemClickActionValType>;
+	interfaceEmitsAction<interfaceMenuItemClickActionValType>;
 
 export type typeItemClickCallback = (_emitAction?: typeItemClickAction) => void;
 
@@ -24,7 +28,7 @@ export type typeItemClickEventHandleFunc = (
 interface interfaceSubMenu {
 	id: typeItemId;
 	text: string;
-	action?: menuItemClickActionValType /* emit to App.vue,decide what acion of current node to do */;
+	action?: typeItemClickAction /* emit to App.vue,decide what acion of current node to do */;
 	priority?: PriorytyLevel /* if set prioryty */;
 	clickEvent?: typeItemClickEventHandleFunc;
 }
@@ -32,19 +36,114 @@ interface interfaceSubMenu {
 export interface interfaceContextMenuItem {
 	id: typeItemId;
 	text: string;
-	action?: menuItemClickActionValType;
+	action?: typeItemClickAction;
 	subMenu?: Array<interfaceSubMenu>;
 	clickEvent?: typeItemClickEventHandleFunc;
 }
 
-export interface menuPosition {
-	clientX: number;
-	clientY: number;
-}
+
 export interface menuProps {
-	position: menuPosition;
 	items: Array<interfaceContextMenuItem>;
 }
 //clientX clientY to decide position get from contextMenu Event
 
-export type rightClickValType = { menu: menuProps; treeNode: MindNode; target?:HTMLElement};
+
+function itemClick(e: PointerEvent, _callback?: () => void) {
+	//console.dir(e.target as HTMLElement);
+	if (_callback) {
+		_callback.call(e.target as HTMLElement);
+	}
+}
+export const menu:menuProps =  {
+	items: [
+		{
+			id: "editText",
+			text: "edit text",
+			action: {
+				action:"edit-text",
+				val:{
+					
+				}
+			},
+			clickEvent: itemClick,
+		},
+		{
+			id: "delete",
+			text: "delete",
+			action: {action:"delete-node"},
+			clickEvent: itemClick,
+		},
+		{
+			id: "insert",
+			text: "insert",
+			subMenu: [
+				{
+					id: "child",
+					text: "child",
+					action: {action:"insert-child"},
+					clickEvent: itemClick,
+				},
+				{
+					id: "father",
+					text: "father",
+					action: {action:"insert-parent"},
+					clickEvent: itemClick,
+				},
+				{
+					id: "sibling",
+					text: "sibling",
+					action:{action: "insert-sibling"},
+					clickEvent: itemClick,
+				},
+			],
+		},
+		{
+			id: "setPriority",
+			text: "priority",
+			subMenu: [
+				{
+					id: PriorytyLevel.highest,
+					text: PriorytyLevel.highest,
+					action: {action:"set-priority"},
+					priority: PriorytyLevel.highest,
+					clickEvent: itemClick,
+				},
+				{
+					id: PriorytyLevel.higher,
+					text: PriorytyLevel.higher,
+					action: {action:"set-priority"},
+					priority: PriorytyLevel.higher,
+					clickEvent: itemClick,
+				},
+				{
+					id: PriorytyLevel.medium,
+					text: PriorytyLevel.medium,
+					action: {action:"set-priority"},
+					priority: PriorytyLevel.medium,
+					clickEvent: itemClick,
+				},
+				{
+					id: PriorytyLevel.lower,
+					text: PriorytyLevel.lower,
+					action: {action:"set-priority"},
+					priority: PriorytyLevel.lower,
+					clickEvent: itemClick,
+				},
+				{
+					id: PriorytyLevel.lowest,
+					text: PriorytyLevel.lowest,
+					action: {action:"set-priority"},
+					priority: PriorytyLevel.lowest,
+					clickEvent: itemClick,
+				},
+				{
+					id: PriorytyLevel.none,
+					text: PriorytyLevel.none,
+					action: {action:"set-priority"},
+					priority: PriorytyLevel.none,
+					clickEvent: itemClick,
+				},
+			],
+		},
+	],
+}

@@ -27,7 +27,7 @@
 				:node="MindFile.mindNode"
 				:treeRoot="MindFile.mindNode"
 				:is-main-scroll="isMainScroll"
-				@node-right-click="(action:interfaceEmitsAction<rightClickValType>)=>{
+				@node-right-click="(action:interfaceEmitsAction<typeTreeNodeRightClickValType>)=>{
 					console.log('action :>> ', action.val.target);
 					//用action.val.target 修改class 更改样式
 					treeRightClickAction = action;
@@ -39,7 +39,7 @@
 			<!-- TODO focused node 特殊显示 -->
 		</section>
 		<Modal
-			:show="isShowModal "
+			:show="isShowModal"
 			@close-modal="(action:interfaceEmitsAction<boolean>)=>{isShowModal = action.val}"
 		>
 			<template #title>
@@ -64,18 +64,13 @@
 			</template>
 		</Modal>
 		<ContextMenu
-			:menu="treeRightClickAction?.val.menu"
+			:menu="menu"
+			:position="treeRightClickAction.val.position"
 			:treeNodeId="treeRightClickAction.val.treeNode.data.id"
 			v-if="showContextMenu"
 			@context-menu-item-click="contextMenuItemClickHandleFunc"
 		/>
-		<FloatInputBlank
-		:floatInputProperty="{
-			position: { clientX: 0, clientY: 0 },
-			text: '',
-			isShow: true,
-		}"
-	></FloatInputBlank>
+		<FloatInputBlank :floatInputProperty="floatinputProp"></FloatInputBlank>
 	</div>
 </template>
 
@@ -84,7 +79,6 @@ import TopbarView from "./components/topbars/TopbarView.vue";
 import treeChart from "./components/treeChart/treeChart.vue";
 import Modal from "./components/selfUIs/Modal/Modal.vue";
 import Sidebar from "./components/sidebars/SidebarView.vue";
-
 import { ref, getCurrentInstance, onMounted, Ref } from "vue";
 import {
 	EnumReconiteCode,
@@ -100,11 +94,12 @@ import { sidebarProps, toolTypes } from "./interfaces/ComponentProperty";
 import ContextMenu from "./components/selfUIs/ContextMenu/ContextMenu.vue";
 import FloatInputBlank from "./components/selfUIs/FloatInputBlank/FloatInputBlank.vue";
 import {
-	menuItemClickActionValType,
-	rightClickValType,
+	menu,
 	typeItemClickAction,
 } from "./components/selfUIs/ContextMenu/contextMenu";
 import { Components } from "./components/otherTools";
+import { interfaceFloatInputProperty } from "./components/selfUIs/FloatInputBlank/floatInputBlank";
+import { typeTreeNodeRightClickValType } from "./components/treeChart/tree";
 
 /* defines and variables  */
 const instance = getCurrentInstance();
@@ -121,6 +116,11 @@ let MindFile = ref<mindFileContent>({
 	mindName: "Mind",
 	mindNode: null,
 });
+const floatinputProp: Ref<interfaceFloatInputProperty> = ref({
+	position: { clientX: 0, clientY: 0 },
+	text: "",
+	isShow: false,
+});
 const isShowModal = ref(false);
 const sidebarItemList: sidebarProps[] = [
 	{
@@ -131,11 +131,11 @@ const sidebarItemList: sidebarProps[] = [
 ];
 const curTool: Ref<toolTypes> = ref(toolTypes.HexBinDecOct);
 
-const treeRightClickAction: Ref<interfaceEmitsAction<rightClickValType>> = ref({
+const treeRightClickAction: Ref<interfaceEmitsAction<typeTreeNodeRightClickValType>> = ref({
 	action: "",
 	val: {
+		position: { clientX: 0, clientY: 0 },
 		menu: {
-			position: { clientX: 0, clientY: 0 },
 			items: [],
 		},
 		treeNode: null,
@@ -213,11 +213,17 @@ function hideContextMenu(target: Element) {
 	showContextMenu.value = false;
 }
 function contextMenuItemClickHandleFunc(itemClickAction: typeItemClickAction) {
-	console.log("itemClickAction :>> ", itemClickAction);
-	let nodeAction: menuItemClickActionValType = itemClickAction.val;
-	if (nodeAction) {
-		switch (nodeAction) {
+	if(!treeRightClickAction.value.val){return;}
+	// console.log("itemClickAction :>> ", itemClickAction);
+	let nodeActionToDo: string = itemClickAction.action;
+	if (nodeActionToDo) {
+		switch (nodeActionToDo) {
 			case "edit-text":
+				//show float input blank
+				floatinputProp.value.text = treeRightClickAction.value.val.treeNode.data.text;
+				floatinputProp.value.isShow = true;
+				floatinputProp.value.position = treeRightClickAction.value.val.position;
+				//确定位置
 				break;
 
 			case "delete-node":
