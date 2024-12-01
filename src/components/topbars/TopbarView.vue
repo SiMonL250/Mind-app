@@ -127,6 +127,7 @@ import {
 	interfaceEmitsAction,
 } from "../../hooks/operate";
 import { ref } from "vue";
+import { typeModalType, typeSHowModalAction } from "./topbar";
 
 const enumValues = ref(Object.entries(PriorytyLevel));
 const model = defineModel();
@@ -172,13 +173,13 @@ const buttonsProps: buttonProps[] = [
 		classList: ["file-operate-btn"],
 		innerText: "shortcut🔪",
 		type: buttonType.showModal,
-		eventClickHandle: showModalClick,
+		eventClickHandle: ()=>showModalClick('shortcut'),
 	},
 	{
 		classList: ["file-operate-btn"],
 		innerText: "tools🔨",
 		type: buttonType.showModal,
-		eventClickHandle: showModalClick,
+		eventClickHandle: ()=>showModalClick('tools'),
 	},
 ];
 
@@ -212,10 +213,13 @@ function selectFileClick(): void {
 function saveFileClick(): void {
 	Emits(NameSpaceFileOperation.saveFile);
 }
-function showModalClick(): void { // emits modal show
-	let actions:interfaceEmitsAction<boolean> = {
+function showModalClick(type:typeModalType): void { // emits modal show
+	let actions:typeSHowModalAction = {
 		action:NameSpaceOtherOperation.showModal,
-		val:true
+		val:{
+			type:type,
+			show:true
+		}
 	} 
 	Emits(NameSpaceOtherOperation.showModal,actions);
 }

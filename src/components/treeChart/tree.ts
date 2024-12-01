@@ -1,5 +1,5 @@
+import { interfacePosition } from "../../interfaces/ComponentProperty";
 import { MindNode, NodeIdType } from "../../interfaces/MindNodeProperty";
-import { menuPosition } from "../selfUIs/ContextMenu/contextMenu";
 
 interface interfaceNodePos {
 	id: NodeIdType;
@@ -87,4 +87,4 @@ export interface LeadLineOptions {
 }
 
 
-export type typeTreeNodeRightClickValType = {position:menuPosition; treeNode: MindNode; target?:HTMLElement};
+export type typeTreeNodeRightClickValType = {position:interfacePosition; treeNode: MindNode; target?:HTMLElement};

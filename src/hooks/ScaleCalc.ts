@@ -13,7 +13,7 @@ export namespace namespaceScales {
 	export const Octonary: scales = 8;
 	export const Hexadecimal: scales = 16;
 	export const Decimal: scales = 10;
-	export const IEEE_754:scales = 754;
+	export const IEEE_754: scales = 754;
 }
 export namespace rexs {
 	export const DecimalRegExp = /^-?\d+(\.\d+)?([eE][-+]?\d+)?$/g;
@@ -112,16 +112,14 @@ function decideBinaryArrayBitsAccount(
 	}
 }
 
-function trimFrontZeroOfArray(arr:any,remainLen?:number):any{
-	let l = remainLen? remainLen:1;
+function trimFrontZeroOfArray(arr: any, remainLen?: number): any[] {
+	let l = remainLen ? remainLen : 1;
 	while (arr[0] == "0" && arr.length > l) {
-		arr = arr.slice(1) as binaryArray|scaleChars; //排除前导0 最后只留下1个0
+		arr = arr.slice(1) as binaryArray | scaleChars; //排除前导0 最后只留下1个0
 	}
-	
+
 	return arr;
 }
-
-
 
 export function decimalToOther(
 	raw: string,
@@ -169,6 +167,7 @@ export function decimalToOther(
 	let bit2DArr = divideArray(singedBitArray, groupItemCounts);
 
 	let scaledArray: Array<string> = chunksToScaleCharsArray(bit2DArr);
+	scaledArray = trimFrontZeroOfArray(scaledArray);
 	return scaledArray.join("");
 }
 
@@ -290,14 +289,16 @@ export const HexadecimalToOther: scaleFunc = function (
 	_bits: typeBitLength,
 	_s: scales
 ) {
-	let b = _bits/4;
-	//TODO 实际是补码转原码
+	let b = _bits / 4;
+	// 实际是补码转原码
 	let scaleCharArr: Array<scaleChars> = raw.split("") as scaleCharsArray;
-	let isMinus:boolean = false;
-	if(scaleCharArr.length < b){
-		scaleCharArr = new Array<scaleChars>(b - scaleCharArr.length).fill('0').concat(scaleCharArr);
+	let isMinus: boolean = false;
+	if (scaleCharArr.length < b) {
+		scaleCharArr = new Array<scaleChars>(b - scaleCharArr.length)
+			.fill("0")
+			.concat(scaleCharArr);
 	}
-	scaleCharArr = trimFrontZeroOfArray(scaleCharArr,b);
+	scaleCharArr = trimFrontZeroOfArray(scaleCharArr, b);
 
 	let a = Array.from(scaleCharArr, (item) =>
 		scaleCharsHashArray.indexOf(item.toUpperCase() as scaleChars)
@@ -311,34 +312,52 @@ export const HexadecimalToOther: scaleFunc = function (
 		return arr;
 	}).flat();
 
-	if(_s === namespaceScales.Binary) return trimFrontZeroOfArray(binaryArray).join(''); // binary, return directly
-	if(_s === namespaceScales.Octonary) {
-		let octonaryChunks:binary2DArray = divideArray(binaryArray,3);
-		return trimFrontZeroOfArray(chunksToScaleCharsArray(octonaryChunks)).join('');
-
+	if (_s === namespaceScales.Binary)
+		return trimFrontZeroOfArray(binaryArray).join(""); // binary, return directly
+	if (_s === namespaceScales.Octonary) {
+		let octonaryChunks: binary2DArray = divideArray(binaryArray, 3);
+		return trimFrontZeroOfArray(
+			chunksToScaleCharsArray(octonaryChunks)
+		).join("");
 	}
-	if (binaryArray[0] === "1") { // 补码转原码 转 10 进制
+	if (binaryArray[0] === "1") {
+		// 补码转原码 转 10 进制
 		//minus
 		isMinus = true;
 		let lastIndexOf1 = binaryArray.lastIndexOf("1");
 		for (let i = 0; i < lastIndexOf1; i++) {
 			binaryArray[i] = binaryArray[i] == "0" ? "1" : "0";
 		}
-
 	}
-	let num:number = 0;
-	for(let i = binaryArray.length-1; i>=0;i--){
-		num += parseInt(binaryArray[i]) * Math.pow(2,binaryArray.length-i-1);
+	let num: number = 0;
+	for (let i = binaryArray.length - 1; i >= 0; i--) {
+		num +=
+			parseInt(binaryArray[i]) * Math.pow(2, binaryArray.length - i - 1);
 	}
-	num = isMinus?-1*num:num;
-	//TODO　CCCCCCCCCCCCCCCC 的结果跟计算器不一样？？？
+	num = isMinus ? -1 * num : num;
+	//TODO　CCCCCCCCCCCCCCCC 的结果跟计算器不一样？？？ 太大的数会出错
 	let decimalStr: string = num.toString();
-	if(_s === namespaceScales.Decimal)
-		return decimalStr;
-
-	else{
+	if (_s === namespaceScales.Decimal) return decimalStr;
+	else {
 		return decimalToIEEE(decimalStr);
 	}
 };
 
+export const BinaryToOther: scaleFunc = function (
+	raw: string,
+	_bits: typeBitLength,
+	_s: scales
+) {
+	let arr:binaryArray = raw.split('') as binaryArray;
+	if(_s === namespaceScales.Decimal){
 
+	}
+	else if(_s === namespaceScales.IEEE_754){
+
+	}
+	else {
+		let bitsPerGrop:number =  (_s ===namespaceScales.Hexadecimal)?4:3;
+		let binary2DArr:binary2DArray = divideArray(arr,bitsPerGrop);
+	}
+	return 'test';
+};

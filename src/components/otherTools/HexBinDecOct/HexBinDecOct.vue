@@ -42,6 +42,7 @@ import {
 	typeBitLength,
 decimalToIEEE,
 HexadecimalToOther,
+BinaryToOther,
 } from "../../../hooks/ScaleCalc";
 const sList: Ref<Array<interfaceScaleListItem>> = ref([
 	{
@@ -106,7 +107,7 @@ const sList: Ref<Array<interfaceScaleListItem>> = ref([
 	},
 ]);
 interface bitlenInterface { text: string; bits: typeBitLength };
-
+const sourceItem:Ref<interfaceScaleListItem> = ref(sList.value[0]); //切换字长时，要截断这个字，作为触发的下一次转换的源值
 const bitLengthList: Ref<Array<bitlenInterface>> = ref([
 	{ text: "Byte", bits: bitLength.Byte },
 	{ text: "Word", bits: bitLength.Word },
@@ -167,16 +168,22 @@ function convertToOtherScaleAndSetVal(val: string, curScaleType: TypeScale) {
 			(this[3] as interfaceScaleListItem).val = decimalToOther(val, selectBitlength.value, namespaceScales.Octonary);
 			(this[4] as interfaceScaleListItem).val = decimalToIEEE(val);
 			CurrentInput.value = this[0] as interfaceScaleListItem;
-			//TODO 填充新值
+			// 填充新值
 			//dec to hex bin oct float
 			break;
-		case "binary":
-			break;
+
 		case "hexadecimal":
 			(this[0] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.Decimal);
 			(this[2] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.Binary);
 			(this[3] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.Octonary);
 			(this[4] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.IEEE_754);
+			break;
+
+		case "binary":
+			(this[0] as interfaceScaleListItem).val = BinaryToOther(val,selectBitlength.value,namespaceScales.Decimal);
+			(this[1] as interfaceScaleListItem).val = BinaryToOther(val, selectBitlength.value, namespaceScales.Hexadecimal);
+			(this[3] as interfaceScaleListItem).val = BinaryToOther(val,selectBitlength.value,namespaceScales.Octonary);
+			(this[4] as interfaceScaleListItem).val = BinaryToOther(val,selectBitlength.value,namespaceScales.IEEE_754);
 			break;
 		case "octonary":
 			break;
@@ -239,7 +246,7 @@ $selectHeight: 40px;
 				max-width: 100%;
 				width: 65%;
 				min-width: 71px;
-				height: 75px;
+				height: 68px;
 				outline: none;
 				display: block;
 			}

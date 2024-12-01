@@ -8,8 +8,13 @@
 				@save-file="saveFileHandle"
 				@create-file="createFileHandle"
 				@show-modal="
-					(action) => {
-						isShowModal = action?.val;
+					(action:typeSHowModalAction) => {
+						if(action.val.type === 'tools'){
+							isShowModal = action?.val.show;
+						}
+						else if(action.val.type === 'shortcut'){
+							isShowShortCut = action.val.show;
+						}
 					}
 				"
 				@node-action="nodeAction"
@@ -28,18 +33,18 @@
 				:treeRoot="MindFile.mindNode"
 				:is-main-scroll="isMainScroll"
 				@node-right-click="(action:interfaceEmitsAction<typeTreeNodeRightClickValType>)=>{
-					console.log('action :>> ', action.val.target);
+					//console.log('action :>> ', action.val.target);
 					//用action.val.target 修改class 更改样式
 					treeRightClickAction = action;
 					showContextMenu = true;
-					focusStore.focusedNode = action.val.treeNode;
+					focusNode.focusedNode = action.val.treeNode;
+					isShowFloatInput = false;
 				}"
 			/>
-			<!-- TODO 浮动的输入框，以更改节点文字 -->
 			<!-- TODO focused node 特殊显示 -->
 		</section>
 		<Modal
-			:show="isShowModal"
+			:show="true/*isShowModal*/"
 			@close-modal="(action:interfaceEmitsAction<boolean>)=>{isShowModal = action.val}"
 		>
 			<template #title>
@@ -63,6 +68,17 @@
 				</div>
 			</template>
 		</Modal>
+		<Modal
+			:show="isShowShortCut"
+			@close-modal="(action:interfaceEmitsAction<boolean>)=>{isShowShortCut = action.val}"
+		>
+			<template #title>
+				<div>
+					<p>shortcuts</p>
+				</div>
+			</template>
+			<template #body> List Views </template>
+		</Modal>
 		<ContextMenu
 			:menu="menu"
 			:position="treeRightClickAction.val.position"
@@ -70,7 +86,12 @@
 			v-if="showContextMenu"
 			@context-menu-item-click="contextMenuItemClickHandleFunc"
 		/>
-		<FloatInputBlank :floatInputProperty="floatinputProp"></FloatInputBlank>
+		<FloatInputBlank
+			:floatInputProperty="floatinputProp"
+			v-if="isShowFloatInput"
+			@hide-input="(action:typeInputBlankEmitsAction)=>{isShowFloatInput = (action.val as boolean)}"
+			@new-text="newTextHandle"
+		></FloatInputBlank>
 	</div>
 </template>
 
@@ -98,8 +119,12 @@ import {
 	typeItemClickAction,
 } from "./components/selfUIs/ContextMenu/contextMenu";
 import { Components } from "./components/otherTools";
-import { interfaceFloatInputProperty } from "./components/selfUIs/FloatInputBlank/floatInputBlank";
+import {
+	interfaceFloatInputProperty,
+	typeInputBlankEmitsAction,
+} from "./components/selfUIs/FloatInputBlank/floatInputBlank";
 import { typeTreeNodeRightClickValType } from "./components/treeChart/tree";
+import { typeSHowModalAction } from "./components/topbars/topbar";
 
 /* defines and variables  */
 const instance = getCurrentInstance();
@@ -109,7 +134,7 @@ interface localStoredType {
 }
 //pinia store
 const fileStore = FileStore();
-const focusStore = focusNodeStore();
+const focusNode = focusNodeStore();
 const isMainScroll = ref(false);
 let MindFile = ref<mindFileContent>({
 	reconicode: EnumReconiteCode.MindJson,
@@ -119,9 +144,10 @@ let MindFile = ref<mindFileContent>({
 const floatinputProp: Ref<interfaceFloatInputProperty> = ref({
 	position: { clientX: 0, clientY: 0 },
 	text: "",
-	isShow: false,
 });
+const isShowFloatInput = ref(false);
 const isShowModal = ref(false);
+const isShowShortCut = ref(false);
 const sidebarItemList: sidebarProps[] = [
 	{
 		toolType: toolTypes.HexBinDecOct,
@@ -131,7 +157,9 @@ const sidebarItemList: sidebarProps[] = [
 ];
 const curTool: Ref<toolTypes> = ref(toolTypes.HexBinDecOct);
 
-const treeRightClickAction: Ref<interfaceEmitsAction<typeTreeNodeRightClickValType>> = ref({
+const treeRightClickAction: Ref<
+	interfaceEmitsAction<typeTreeNodeRightClickValType>
+> = ref({
 	action: "",
 	val: {
 		position: { clientX: 0, clientY: 0 },
@@ -144,6 +172,12 @@ const treeRightClickAction: Ref<interfaceEmitsAction<typeTreeNodeRightClickValTy
 const showContextMenu = ref(false);
 /* defines and variables  */
 /* Even handle function  */
+
+function newTextHandle(action: typeInputBlankEmitsAction) {
+	console.log("action :>> ", action);
+	console.log("object :>> ", focusNode.getId, focusNode.getText);
+	//TODO 修改节点文字
+}
 function changeMindNameHandle(newName: string): void {
 	console.log("newName :>> ", newName);
 	MindFile.value.mindName = newName;
@@ -175,14 +209,14 @@ function nodeAction(action: interfaceEmitsAction<string>) {
 }
 
 document.body.addEventListener("click", (e: PointerEvent) => {
-	hideContextMenu(e.target as Element);
+	decideToShowFloatingThing(e);
 });
 document.body.addEventListener("contextmenu", (e: PointerEvent) => {
 	let target: Element = e.target as Element;
 	if (target.className == "menu-items") {
 		e.preventDefault();
 	}
-	hideContextMenu(target);
+	decideToShowFloatingThing(e);
 });
 /* Even handle function  */
 /* live Hooks  */
@@ -192,7 +226,7 @@ onMounted(() => {
 /* live Hooks  */
 /* other functions  */
 function showMessage(text: string, type?: string, remainMS?: number) {
-	instance.proxy.$message(text, type, remainMS);
+	instance.proxy.$message(text, type, remainMS); //有要显示的错误就emit上来就行了
 }
 const test = function () {
 	showMessage("fuck");
@@ -205,7 +239,32 @@ function storeAndMindInit() {
 		fileStore.setfileContent(localContent.fileContent);
 	}
 }
-function hideContextMenu(target: Element) {
+function decideToShowFloatingThing(e: PointerEvent) {
+	let target: Element = e?.target as Element;
+	//floating input
+	if (e.type === "click") {
+		let selection = window.getSelection();
+
+		if (selection.toString().trim().length !== 0) {
+			// selection.removeAllRanges();
+			return;
+		}
+		// console.log("target.className :>> ", target);
+		if (
+			(target instanceof HTMLElement) &&
+			(!target?.className.includes("float-input-container") &&
+			!target?.className.includes("float-input") &&
+			!target?.className.includes("edit-text"))
+		) {
+			isShowFloatInput.value = false;
+		}
+	}
+	if (e.type === "contextmenu") {
+		if (!target.className.includes("float-input")) {
+			isShowFloatInput.value = false;
+		}
+	}
+	// context menu
 	if (target.className == "treeNode") return;
 	if ((target as HTMLElement).dataset.hasSub === "true") {
 		return;
@@ -213,16 +272,19 @@ function hideContextMenu(target: Element) {
 	showContextMenu.value = false;
 }
 function contextMenuItemClickHandleFunc(itemClickAction: typeItemClickAction) {
-	if(!treeRightClickAction.value.val){return;}
+	if (!treeRightClickAction.value.val) {
+		return;
+	}
 	// console.log("itemClickAction :>> ", itemClickAction);
 	let nodeActionToDo: string = itemClickAction.action;
 	if (nodeActionToDo) {
 		switch (nodeActionToDo) {
 			case "edit-text":
 				//show float input blank
-				floatinputProp.value.text = treeRightClickAction.value.val.treeNode.data.text;
-				floatinputProp.value.isShow = true;
-				floatinputProp.value.position = treeRightClickAction.value.val.position;
+				floatinputProp.value.text =
+					treeRightClickAction.value.val.treeNode.data.text;
+				isShowFloatInput.value = true;
+				floatinputProp.value.position = itemClickAction.val.position;
 				//确定位置
 				break;
 

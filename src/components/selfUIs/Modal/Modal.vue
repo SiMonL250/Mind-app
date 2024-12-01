@@ -81,6 +81,7 @@ watch(props,(newVal)=>{
                 text-align: center;
                 line-height: 24px;
                 margin-right: 8px;
+                user-select: none;
                 cursor: pointer;
                 &:hover{
                     background-color: var(--color-font-focus);
