@@ -107,7 +107,6 @@ const sList: Ref<Array<interfaceScaleListItem>> = ref([
 	},
 ]);
 interface bitlenInterface { text: string; bits: typeBitLength };
-const sourceItem:Ref<interfaceScaleListItem> = ref(sList.value[0]); //切换字长时，要截断这个字，作为触发的下一次转换的源值
 const bitLengthList: Ref<Array<bitlenInterface>> = ref([
 	{ text: "Byte", bits: bitLength.Byte },
 	{ text: "Word", bits: bitLength.Word },
@@ -115,7 +114,7 @@ const bitLengthList: Ref<Array<bitlenInterface>> = ref([
 	{ text: "QWord", bits: bitLength.QWord },
 ]);
 const selectBitlength: Ref<typeBitLength> = ref(bitLength.QWord);
-const CurrentInput:Ref<interfaceScaleListItem> = ref(sList.value[0])
+const CurrentInput:Ref<interfaceScaleListItem> = ref(sList.value[0]) //切换字长时，要截断这个字，作为触发的下一次转换的源值
 const debounced = debounce(EventHandle);
 
 function valMatchRex(rex: RegExp, val: string): boolean {
@@ -146,9 +145,16 @@ function EventHandle(
 }
 function selectBitlengthClick(item:bitlenInterface){
 	if(!item) return;
+	if(CurrentInput.value.type===namespaceScales.IEEE_754) return;
 	selectBitlength.value = item.bits;
-	//TODO 触发一次转换
+	let sListItemIndx:number  = sList.value.indexOf(CurrentInput.value);
+	let len = sList.value[sListItemIndx].val.length;
 
+	sList.value[sListItemIndx].val =sList.value[sListItemIndx].val.slice(len-selectBitlength.value); 
+	console.log('item :>> ',sList.value[sListItemIndx].val);
+	
+	//TODO 触发一次转换
+	calcScale(sList.value[sListItemIndx]);
 }
 //Scale Functions//
 function calcScale(item: interfaceScaleListItem) {
@@ -160,7 +166,7 @@ function convertToOtherScaleAndSetVal(val: string, curScaleType: TypeScale) {
 	// bitLength
 	if (!this) return;
 	//(this[1] as interfaceScaleListItem).val = '0000' 直接这样赋值就行
-	console.log("curSType :>> ", curScaleType);
+	// console.log("curSType :>> ", curScaleType);
 	switch (curScaleType) {
 		case "decimal":
 			(this[1] as interfaceScaleListItem).val = decimalToOther(val, selectBitlength.value, namespaceScales.Hexadecimal);
@@ -177,6 +183,7 @@ function convertToOtherScaleAndSetVal(val: string, curScaleType: TypeScale) {
 			(this[2] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.Binary);
 			(this[3] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.Octonary);
 			(this[4] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.IEEE_754);
+			CurrentInput.value = this[1] as interfaceScaleListItem;
 			break;
 
 		case "binary":
@@ -184,6 +191,7 @@ function convertToOtherScaleAndSetVal(val: string, curScaleType: TypeScale) {
 			(this[1] as interfaceScaleListItem).val = BinaryToOther(val, selectBitlength.value, namespaceScales.Hexadecimal);
 			(this[3] as interfaceScaleListItem).val = BinaryToOther(val,selectBitlength.value,namespaceScales.Octonary);
 			(this[4] as interfaceScaleListItem).val = BinaryToOther(val,selectBitlength.value,namespaceScales.IEEE_754);
+			CurrentInput.value = this[2] as interfaceScaleListItem;
 			break;
 		case "octonary":
 			break;

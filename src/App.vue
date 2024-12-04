@@ -56,8 +56,8 @@
 				<div class="side-bar">
 					<Sidebar
 						:itemList="sidebarItemList"
-						@switch-tool="(action:interfaceEmitsAction<toolTypes>)=>{
-						curTool = action.val;
+						@switch-tool="(_action:interfaceEmitsAction<toolTypes>)=>{
+						curTool = 'CrcCheck' as toolTypes//_action.val;
 
 					}"
 					/>

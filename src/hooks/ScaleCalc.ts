@@ -1,6 +1,8 @@
-export type scales = 2 | 8 | 16 | 10 | 754;
+import { TypeScale } from "../components/otherTools/HexBinDecOct";
+
+	//TODO 太大的数会出错,因为超出了 JavaScript 能够安全表示的整数范围。
 export type typeBitLength = 64 | 32 | 16 | 8;
-type scaleFunc = (raw: string, bits?: typeBitLength, s?: scales) => string;
+type scaleFunc = (raw: string, bits?: typeBitLength, s?: TypeScale) => string;
 
 export namespace bitLength {
 	export const QWord: typeBitLength = 64;
@@ -9,11 +11,11 @@ export namespace bitLength {
 	export const Byte: typeBitLength = 8;
 }
 export namespace namespaceScales {
-	export const Binary: scales = 2;
-	export const Octonary: scales = 8;
-	export const Hexadecimal: scales = 16;
-	export const Decimal: scales = 10;
-	export const IEEE_754: scales = 754;
+	export const Binary: TypeScale = "binary";
+	export const Octonary: TypeScale = "octonary";
+	export const Hexadecimal: TypeScale = "hexadecimal";
+	export const Decimal: TypeScale = "decimal";
+	export const IEEE_754: TypeScale = "IEEE_float";
 }
 export namespace rexs {
 	export const DecimalRegExp = /^-?\d+(\.\d+)?([eE][-+]?\d+)?$/g;
@@ -124,19 +126,19 @@ function trimFrontZeroOfArray(arr: any, remainLen?: number): any[] {
 export function decimalToOther(
 	raw: string,
 	bits: typeBitLength /* 根据这个确定最后是字节、字、双字等 */,
-	s: scales /*进制(10进制除外)，根据这个把 bitsArray分组*/
+	s: TypeScale /*进制(10进制除外)，根据这个把 bitsArray分组*/
 ) {
 	let groupItemCounts: number;
 	switch (
 		s //only 2**n 进制
 	) {
-		case 2:
+		case namespaceScales.Binary:
 			groupItemCounts = 1;
 			break;
-		case 8:
+		case namespaceScales.Octonary:
 			groupItemCounts = 3;
 			break;
-		case 16:
+		case namespaceScales.Hexadecimal:
 			groupItemCounts = 4;
 			break;
 	}
@@ -287,7 +289,7 @@ export const decimalToIEEE: scaleFunc = function (raw: string) {
 export const HexadecimalToOther: scaleFunc = function (
 	raw: string,
 	_bits: typeBitLength,
-	_s: scales
+	_s: TypeScale
 ) {
 	let b = _bits / 4;
 	// 实际是补码转原码
@@ -335,7 +337,7 @@ export const HexadecimalToOther: scaleFunc = function (
 			parseInt(binaryArray[i]) * Math.pow(2, binaryArray.length - i - 1);
 	}
 	num = isMinus ? -1 * num : num;
-	//TODO　CCCCCCCCCCCCCCCC 的结果跟计算器不一样？？？ 太大的数会出错
+
 	let decimalStr: string = num.toString();
 	if (_s === namespaceScales.Decimal) return decimalStr;
 	else {
@@ -346,18 +348,44 @@ export const HexadecimalToOther: scaleFunc = function (
 export const BinaryToOther: scaleFunc = function (
 	raw: string,
 	_bits: typeBitLength,
-	_s: scales
+	_s: TypeScale
 ) {
 	let arr:binaryArray = raw.split('') as binaryArray;
+	arr = trimFrontZeroOfArray(arr);
 	if(_s === namespaceScales.Decimal){
-
+		let num:number = 0;
+		let len = arr.length;
+		let minus = 1;
+		if(len == _bits){ // 最高位是1，负数
+			if(arr[0]==='1'){
+				minus = -1;
+				let indx = arr.lastIndexOf('1');
+				
+				arr = Array.from(arr.slice(1),(item,i)=>{
+					if(minus===-1){
+						if(i >= indx-1) return item;
+						return item==='0'?'1':'0';
+					}
+					else{
+						return item;
+					}
+				})
+			}
+		}
+		len = arr.length;
+		for(let i=len-1;i>=0;i--){
+			num += parseInt(arr[i])*Math.pow(2,(len-i-1));
+		}
+		return (minus*num).toString();
 	}
 	else if(_s === namespaceScales.IEEE_754){
-
+		
 	}
 	else {
 		let bitsPerGrop:number =  (_s ===namespaceScales.Hexadecimal)?4:3;
 		let binary2DArr:binary2DArray = divideArray(arr,bitsPerGrop);
+		let scaleChars: scaleCharsArray  =chunksToScaleCharsArray(binary2DArr);
+		return scaleChars.join('');
 	}
-	return 'test';
+	
 };
