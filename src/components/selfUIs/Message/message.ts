@@ -1,16 +1,16 @@
 import { createVNode, render } from "vue";
 import MessagePopup from "./MessagePopup.vue";
 import { StyleValue } from "vue";
+export type typeMessage = "success"| "error"| "normal"|"warning";
 
-export const msgTypes: string[] = ["success", "error", "normal", "warning"];
-
+export const msgTypes: typeMessage[] = ["success", "error", "normal", "warning"];
 const className = "my-message";
 const div = document.createElement("div");
 div.setAttribute("class", className);
 document.body.appendChild(div);
 let timer: number;
 
-export default (text: string, type?: string, remainMs?: number) => {
+export default (text: string, type?: typeMessage, remainMs?: number) => {
 	if (type && !msgTypes.includes(type)) {
 		console.warn("Message Type Error~");
 		type = "normal";

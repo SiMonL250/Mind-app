@@ -1,8 +1,8 @@
 import { interfacePosition } from "../../interfaces/ComponentProperty";
-import { MindNode, NodeIdType } from "../../interfaces/MindNodeProperty";
+import { MindNode, typeNodeId } from "../../interfaces/MindNodeProperty";
 
 interface interfaceNodePos {
-	id: NodeIdType;
+	id: typeNodeId;
 }
 export interface interfaceChildAndFatherProp {
 	father: interfaceNodePos;
@@ -20,27 +20,35 @@ type plugVal =
 	| "hand"
 	| "behind"
 	| "crosshair";
-interface dashObject{
+
+export type typeshowEffectName = "none" | "fade" | "draw";
+export interface animOptions {
+	duration: number;
+	timing:
+		| [number, number, number, number]
+		| "ease"
+		| "ease-in"
+		| "ease-out"
+		| "ease-in-out"
+		| "linear";
+}
+interface dashObject {
 	//The size of parts of the dashed line, in pixels.
 	//len is length of drawn lines, gap is gap between drawn lines.
 	len?: number | string;
 	gap?: number | string;
-	animation?:boolean,
-
+	animation?: boolean;
 }
-interface gradientObject{
-	startColor?:string,
-	endColor?:string,
-
+interface gradientObject {
+	startColor?: string;
+	endColor?: string;
 }
-interface dropShadowObject{
-	dx?:number,
-	dy?:number,
-	blur?:number,
-	color?:string,
-	opacity?:number,
-
-
+interface dropShadowObject {
+	dx?: number;
+	dy?: number;
+	blur?: number;
+	color?: string;
+	opacity?: number;
 }
 export interface LeadLineOptions {
 	color?: string;
@@ -48,6 +56,8 @@ export interface LeadLineOptions {
 
 	//how to draw the line:
 	path?: pathVal;
+
+	positionByWindowResize?: boolean;
 
 	//The string to indicate which side of the element the leader line connects
 	startSocket?: socketVal;
@@ -80,11 +90,13 @@ export interface LeadLineOptions {
 
 	dash?: boolean | dashObject;
 
-	gradient?:boolean|gradientObject;
+	gradient?: boolean | gradientObject;
 
-	dropShadow?:boolean|dropShadowObject,
-
+	dropShadow?: boolean | dropShadowObject;
 }
 
-
-export type typeTreeNodeRightClickValType = {position:interfacePosition; treeNode: MindNode; target?:HTMLElement};
+export type typeTreeNodeRightClickValType = {
+	position: interfacePosition;
+	treeNode: MindNode;
+	target?: HTMLElement;
+};

@@ -1,6 +1,6 @@
 import { TypeScale } from "../components/otherTools/HexBinDecOct";
 
-	//TODO 太大的数会出错,因为超出了 JavaScript 能够安全表示的整数范围。
+//TODO 太大的数会出错,因为超出了 JavaScript 能够安全表示的整数范围。
 export type typeBitLength = 64 | 32 | 16 | 8;
 type scaleFunc = (raw: string, bits?: typeBitLength, s?: TypeScale) => string;
 
@@ -17,7 +17,7 @@ export namespace namespaceScales {
 	export const Decimal: TypeScale = "decimal";
 	export const IEEE_754: TypeScale = "IEEE_float";
 }
-export namespace rexs {
+export namespace namespaceScalsRexs {
 	export const DecimalRegExp = /^-?\d+(\.\d+)?([eE][-+]?\d+)?$/g;
 	export const BinaryRegExp = /\s*[01]+\s*/g;
 	export const HexadecimalRegExp = /\s*[a-fA-F0-9]+\s*/g; // hex and float
@@ -67,9 +67,9 @@ interface interfaceBinaryFraction {
 	power: number;
 	//integerPart.fractionPart * 2^power;
 }
-type binaryArray = Array<binarybit>;
+export type binaryArray = Array<binarybit>;
 type binary2DArray = Array<Array<binarybit>>;
-type scaleCharsArray = Array<scaleChars>;
+export type scaleCharsArray = Array<scaleChars>;
 
 function divideArray(arr: binaryArray, itemsPerGroup: number): binary2DArray {
 	let chunks: binary2DArray = [];
@@ -350,42 +350,98 @@ export const BinaryToOther: scaleFunc = function (
 	_bits: typeBitLength,
 	_s: TypeScale
 ) {
-	let arr:binaryArray = raw.split('') as binaryArray;
+	let arr: binaryArray = raw.split("") as binaryArray;
 	arr = trimFrontZeroOfArray(arr);
-	if(_s === namespaceScales.Decimal){
-		let num:number = 0;
+	if (_s === namespaceScales.Decimal) {
+		let num: number = 0;
 		let len = arr.length;
 		let minus = 1;
-		if(len == _bits){ // 最高位是1，负数
-			if(arr[0]==='1'){
+		if (len == _bits) {
+			// 最高位是1，负数
+			if (arr[0] === "1") {
 				minus = -1;
-				let indx = arr.lastIndexOf('1');
-				
-				arr = Array.from(arr.slice(1),(item,i)=>{
-					if(minus===-1){
-						if(i >= indx-1) return item;
-						return item==='0'?'1':'0';
-					}
-					else{
+				let indx = arr.lastIndexOf("1");
+
+				arr = Array.from(arr.slice(1), (item, i) => {
+					if (minus === -1) {
+						if (i >= indx - 1) return item;
+						return item === "0" ? "1" : "0";
+					} else {
 						return item;
 					}
-				})
+				});
 			}
 		}
 		len = arr.length;
-		for(let i=len-1;i>=0;i--){
-			num += parseInt(arr[i])*Math.pow(2,(len-i-1));
+		for (let i = len - 1; i >= 0; i--) {
+			num += parseInt(arr[i]) * Math.pow(2, len - i - 1);
 		}
-		return (minus*num).toString();
+		return (minus * num).toString();
+	} else if (_s === namespaceScales.IEEE_754) {
+	} else {
+		let bitsPerGrop: number = _s === namespaceScales.Hexadecimal ? 4 : 3;
+		let binary2DArr: binary2DArray = divideArray(arr, bitsPerGrop);
+		let scaleChars: scaleCharsArray = chunksToScaleCharsArray(binary2DArr);
+		return scaleChars.join("");
 	}
-	else if(_s === namespaceScales.IEEE_754){
-		
+};
+
+export const OctonaryToOther: scaleFunc = function (
+	raw: string,
+	_bits?: typeBitLength,
+	_s?: TypeScale
+) {
+	const octonalScalesCharArr: scaleCharsArray = raw.split(
+		""
+	) as scaleCharsArray;
+
+	const octonalNumberArray: Array<number> = Array.from(
+		octonalScalesCharArr,
+		(i) => scaleCharsHashArray.indexOf(i)
+	);
+	let binaryString: string = Array.from(octonalNumberArray, (i) => {
+		let ba = i.toString(2);
+		if (ba.length === 1) ba = "00" + ba;
+		if (ba.length === 2) ba = "0" + ba;
+		return ba;
+		//长度不够3的话，要补0
+	}).join("");
+	let len = binaryString.length;
+	let minus = 1;
+	if(len>_bits){
+		binaryString = binaryString.slice(len-_bits);
 	}
-	else {
-		let bitsPerGrop:number =  (_s ===namespaceScales.Hexadecimal)?4:3;
-		let binary2DArr:binary2DArray = divideArray(arr,bitsPerGrop);
-		let scaleChars: scaleCharsArray  =chunksToScaleCharsArray(binary2DArr);
-		return scaleChars.join('');
+	if(binaryString[0]==='1' && binaryString.length===_bits){
+		minus = -1;//截取后，或者截取前，符号位是1；
 	}
-	
+	if(_s === namespaceScales.Binary){
+		let first1Indx = binaryString.indexOf('1');
+		if(first1Indx===-1) return '0';
+		else 
+		return binaryString.slice(first1Indx);
+	}
+	if(_s===namespaceScales.Hexadecimal){
+		let binaryChunks:binary2DArray = divideArray(binaryString.split('') as binaryArray,4);
+		return chunksToScaleCharsArray(binaryChunks).join('');
+	}
+	if(_s===namespaceScales.Decimal){
+		let num = 0;
+		let arr = binaryString.split('');
+		console.log('arr :>> ', arr);
+		if(minus == -1){
+			for(let i=arr.length-1; i>0;i--){
+				num += parseInt((arr[i]=='1')?'0':'1') * Math.pow(2,arr.length-i-1);
+				// console.log('num :>> ', num);
+			}
+			return (-num)+'';
+		}
+		else{
+			for(let i=arr.length-1; i>=0;i--){
+				num += parseInt(arr[i]) * Math.pow(2,arr.length-i-1);
+				// console.log('num :>> ', num);
+
+			}
+			return num+'';
+		}
+	}
 };

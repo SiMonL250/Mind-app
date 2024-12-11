@@ -1,4 +1,4 @@
-import { MindNode, NodeIdType, PriorytyLevel } from "./../interfaces/MindNodeProperty";
+import { MindNode, typeNodeId, PriorytyLevel } from "./../interfaces/MindNodeProperty";
 import { StoreDefinition, defineStore } from "pinia";
 type stateType = {
 	focusedNode: MindNode | null;
@@ -9,7 +9,7 @@ export const focusNodeStore: StoreDefinition<
 	stateType,
 	{
 		getText: (state: stateType) => string;
-		getId: (state: stateType) => NodeIdType;
+		getId: (state: stateType) => typeNodeId;
         getPriority:(state:stateType)=>PriorytyLevel;
 	},
 	{

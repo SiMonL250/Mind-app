@@ -28,10 +28,12 @@
 				}
 			"
 		>
+			<RollingSelect />
 			<treeChart
 				:node="MindFile.mindNode"
 				:treeRoot="MindFile.mindNode"
 				:is-main-scroll="isMainScroll"
+				:is-text-change="isTextChange"
 				@node-right-click="(action:interfaceEmitsAction<typeTreeNodeRightClickValType>)=>{
 					//console.log('action :>> ', action.val.target);
 					//用action.val.target 修改class 更改样式
@@ -40,11 +42,12 @@
 					focusNode.focusedNode = action.val.treeNode;
 					isShowFloatInput = false;
 				}"
+				ref="treeChartRef"
 			/>
 			<!-- TODO focused node 特殊显示 -->
 		</section>
 		<Modal
-			:show="true/*isShowModal*/"
+			:show="isShowModal /* true*/"
 			@close-modal="(action:interfaceEmitsAction<boolean>)=>{isShowModal = action.val}"
 		>
 			<template #title>
@@ -57,8 +60,7 @@
 					<Sidebar
 						:itemList="sidebarItemList"
 						@switch-tool="(_action:interfaceEmitsAction<toolTypes>)=>{
-						curTool = 'CrcCheck' as toolTypes//_action.val;
-
+						curTool = _action.val;'CrcCheck'
 					}"
 					/>
 				</div>
@@ -100,6 +102,7 @@ import TopbarView from "./components/topbars/TopbarView.vue";
 import treeChart from "./components/treeChart/treeChart.vue";
 import Modal from "./components/selfUIs/Modal/Modal.vue";
 import Sidebar from "./components/sidebars/SidebarView.vue";
+import RollingSelect from "./components/selfUIs/RollingSelect/RollingSelect.vue";
 import { ref, getCurrentInstance, onMounted, Ref } from "vue";
 import {
 	EnumReconiteCode,
@@ -125,6 +128,15 @@ import {
 } from "./components/selfUIs/FloatInputBlank/floatInputBlank";
 import { typeTreeNodeRightClickValType } from "./components/treeChart/tree";
 import { typeSHowModalAction } from "./components/topbars/topbar";
+import {
+	KeyPropertyText,
+	deleteNode,
+	findMindNodebyId,
+	getFatherNodeByChildId,
+	typeNodeId,
+	updateNodeProperty,
+} from "./interfaces/MindNodeProperty";
+import { typeMessage } from "./components/selfUIs/Message/message";
 
 /* defines and variables  */
 const instance = getCurrentInstance();
@@ -147,6 +159,7 @@ const floatinputProp: Ref<interfaceFloatInputProperty> = ref({
 });
 const isShowFloatInput = ref(false);
 const isShowModal = ref(false);
+const isTextChange = ref(false);
 const isShowShortCut = ref(false);
 const sidebarItemList: sidebarProps[] = [
 	{
@@ -155,7 +168,9 @@ const sidebarItemList: sidebarProps[] = [
 	},
 	{ toolType: toolTypes.CrcCheck, innerText: "Crc Check" },
 ];
-const curTool: Ref<toolTypes> = ref(toolTypes.HexBinDecOct);
+const curTool: Ref<toolTypes> = ref(toolTypes.CrcCheck);
+
+const treeChartRef = ref(null);
 
 const treeRightClickAction: Ref<
 	interfaceEmitsAction<typeTreeNodeRightClickValType>
@@ -174,9 +189,17 @@ const showContextMenu = ref(false);
 /* Even handle function  */
 
 function newTextHandle(action: typeInputBlankEmitsAction) {
-	console.log("action :>> ", action);
-	console.log("object :>> ", focusNode.getId, focusNode.getText);
-	//TODO 修改节点文字
+	// console.log("action :>> ", action);
+	if (!action.val) return;
+	//TODO 修改节点文字 之后要触发【线条重绘】，
+	//要触发【线条重绘】就类似“发送命令”给组件的形式
+	//prop emits 还是 defineExpose
+	updateNodeProperty(
+		MindFile.value.mindNode,
+		focusNode.getId,
+		KeyPropertyText,
+		action.val
+	);
 }
 function changeMindNameHandle(newName: string): void {
 	console.log("newName :>> ", newName);
@@ -225,7 +248,7 @@ onMounted(() => {
 });
 /* live Hooks  */
 /* other functions  */
-function showMessage(text: string, type?: string, remainMS?: number) {
+function showMessage(text: string, type?: typeMessage, remainMS?: number) {
 	instance.proxy.$message(text, type, remainMS); //有要显示的错误就emit上来就行了
 }
 const test = function () {
@@ -251,10 +274,10 @@ function decideToShowFloatingThing(e: PointerEvent) {
 		}
 		// console.log("target.className :>> ", target);
 		if (
-			(target instanceof HTMLElement) &&
-			(!target?.className.includes("float-input-container") &&
+			target instanceof HTMLElement &&
+			!target?.className.includes("float-input-container") &&
 			!target?.className.includes("float-input") &&
-			!target?.className.includes("edit-text"))
+			!target?.className.includes("edit-text")
 		) {
 			isShowFloatInput.value = false;
 		}
@@ -275,6 +298,7 @@ function contextMenuItemClickHandleFunc(itemClickAction: typeItemClickAction) {
 	if (!treeRightClickAction.value.val) {
 		return;
 	}
+	console.log("itemClickAction :", itemClickAction);
 	// console.log("itemClickAction :>> ", itemClickAction);
 	let nodeActionToDo: string = itemClickAction.action;
 	if (nodeActionToDo) {
@@ -289,6 +313,22 @@ function contextMenuItemClickHandleFunc(itemClickAction: typeItemClickAction) {
 				break;
 
 			case "delete-node":
+				let nodeId: typeNodeId = itemClickAction.val
+					.nodeId as typeNodeId;
+				
+				if (!nodeId) {
+					showMessage("null node id!", "error");
+					return;
+				}
+				// console.log('delete :' ,treeRightClickAction.value);
+				if (!getFatherNodeByChildId(MindFile.value.mindNode, nodeId)) {
+					showMessage("root can`t be delete!", "warning");
+					return;
+				}else{
+					MindFile.value.mindNode = deleteNode(MindFile.value.mindNode,nodeId);
+					console.log('MindFile.value.mindNode :>> ', MindFile.value.mindNode);
+					console.dir(findMindNodebyId(MindFile.value.mindNode,nodeId));
+				}
 				break;
 
 			case "set-priority":
@@ -325,6 +365,7 @@ function contextMenuItemClickHandleFunc(itemClickAction: typeItemClickAction) {
 	}
 	.main-section {
 		width: 100%;
+		//position: relative;
 		height: calc(100% - var(--height-topbar));
 		padding: 5px 13px 0 13px;
 		box-sizing: border-box;

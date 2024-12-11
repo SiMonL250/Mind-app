@@ -9,7 +9,6 @@
 			<div
 				:class="{
 					treeNode: true,
-					
 				}"
 				:id="node.data.id"
 				ref="curNodeEle"
@@ -46,11 +45,12 @@
 
 <script setup lang="ts">
 import treeChart from "./treeChart.vue";
+import { MindNode, getFatherNode } from "../../interfaces/MindNodeProperty";
 import {
-	MindNode,
-	getFatherNode,
-} from "../../interfaces/MindNodeProperty";
-import { interfaceChildAndFatherProp, LeadLineOptions, typeTreeNodeRightClickValType } from "./tree";
+	interfaceChildAndFatherProp,
+	LeadLineOptions,
+	typeTreeNodeRightClickValType,
+} from "./tree";
 import { ref, onMounted, onUnmounted } from "vue";
 import LeaderLine from "leader-line-vue";
 import { watch } from "vue";
@@ -58,10 +58,9 @@ import {
 	NameSpaceNodeOperate,
 	interfaceEmitsAction,
 } from "../../hooks/operate";
-import {
-	menuProps,
-} from "../selfUIs/ContextMenu/contextMenu";
+import { menuProps } from "../selfUIs/ContextMenu/contextMenu";
 //props and variables
+
 const treeProp = defineProps<{
 	node: MindNode;
 	treeRoot: MindNode;
@@ -73,17 +72,17 @@ let line: LeaderLine;
 let childAndFatherProp: interfaceChildAndFatherProp;
 
 /* events methods */
-window.addEventListener(
-	"resize",
-	() => {
-		try {
-			line?.position();
-		} catch (e) {}
+// window.addEventListener(
+// 	"resize",
+// 	() => {
+// 		try {
+// 			line?.position();
+// 		} catch (e) {}
 
-		// 好像有bug？？
-	},
-	false
-);
+// 		// 好像有bug？？
+// 	},
+// 	false
+// );
 
 function rightClick(e: PointerEvent, node: MindNode) {
 	// console.log("e :>> ", e);
@@ -91,15 +90,14 @@ function rightClick(e: PointerEvent, node: MindNode) {
 	//emit to direct parent
 
 	let val: typeTreeNodeRightClickValType = {
-		position:{clientX:e.clientX,clientY:e.clientY},
+		position: { clientX: e.clientX, clientY: e.clientY },
 		treeNode: node,
-		target:e.target as HTMLElement,
+		target: e.target as HTMLElement,
 	};
-	let action: interfaceEmitsAction<{treeNode: MindNode }> =
-		{
-			action: NameSpaceNodeOperate.NodeRightClick,
-			val: val,
-		};
+	let action: interfaceEmitsAction<{ treeNode: MindNode }> = {
+		action: NameSpaceNodeOperate.NodeRightClick,
+		val: val,
+	};
 	emits(NameSpaceNodeOperate.NodeRightClick, action);
 }
 function EmitFromChild(
@@ -111,15 +109,30 @@ function EmitFromChild(
 watch(
 	() => treeProp.isMainScroll,
 	(newVal, oldVal) => {
-		if (newVal != oldVal) {
+		if (newVal !== oldVal) {
+			
 			line?.position();
 		}
 	}
 );
+// watch(
+// 	() => treeProp.node?.data.text,
+// 	(newVal, oldVal) => {
+// 		console.log('newVal != oldVal :>> ',newVal,oldVal, newVal !== oldVal);
+// 		if (newVal != oldVal) {
+// 			line?.position();
+
+// 			//TODO 还要监听父、子，然后重绘
+// 		}
+// 		// line?.position();
+// 	}
+// );
+
 onMounted(() => {
 	getNodeAndFatherProp();
 	//console.dir( childAndFatherPos);
 	drawByLeaderLine();
+	line?.show('draw',{duration:1200,timing:"ease-in-out"})
 });
 function getNodeAndFatherProp() {
 	let fatherNode: MindNode;
@@ -144,8 +157,10 @@ function drawByLeaderLine() {
 		!childAndFatherProp &&
 		!childAndFatherProp?.child &&
 		!childAndFatherProp?.father
-	)
+	) {
 		return;
+	}
+
 	let option: LeadLineOptions = {
 		startPlug: "disc",
 		endPlug: "disc",
@@ -154,16 +169,20 @@ function drawByLeaderLine() {
 		endSocket: "top",
 		color: "#bbb",
 		path: "fluid",
+		// positionByWindowResize:true,
 	};
 	line = LeaderLine.setLine(
 		document.getElementById(childAndFatherProp.father.id),
 		curNodeEle.value,
 		option
 	);
+	line.hide('none')
 }
 onUnmounted(() => {
 	line?.remove();
 });
+
+defineExpose({});
 </script>
 
 <style scoped lang="scss">
@@ -186,6 +205,7 @@ $colorNodeBkg: #fafafa;
 }
 .treeNode {
 	width: fit-content;
+	max-width: 120px;
 	border: 1px solid $nodeBorderColor;
 	border-radius: 5px;
 	margin: 15px 0.2em 0 0;
@@ -193,6 +213,7 @@ $colorNodeBkg: #fafafa;
 	box-sizing: border-box;
 	padding: 5px;
 	background-color: $colorNodeBkg;
+	word-wrap: break-word;
 	cursor: pointer;
 }
 .focused {

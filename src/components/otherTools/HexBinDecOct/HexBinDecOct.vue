@@ -19,6 +19,7 @@
 					v-model="item.val"
 					@input="
 						 (e:InputEvent)=> {
+							//TODO 如果输入下一个数字，位长度就超标，就不接受输入
 							item?.onInput.call(item, e);
 						}
 					"
@@ -35,7 +36,7 @@ import { Ref, ref } from "vue";
 import { debounce } from "../../../hooks/debounce";
 import { interfaceScaleListItem, EventInput, TypeScale } from "./index";
 import {
-	rexs,
+	namespaceScalsRexs,
 	decimalToOther,
 	bitLength,
 	namespaceScales,
@@ -43,6 +44,7 @@ import {
 decimalToIEEE,
 HexadecimalToOther,
 BinaryToOther,
+OctonaryToOther,
 } from "../../../hooks/ScaleCalc";
 const sList: Ref<Array<interfaceScaleListItem>> = ref([
 	{
@@ -54,7 +56,7 @@ const sList: Ref<Array<interfaceScaleListItem>> = ref([
 			let callback = function () {
 				calcScale(_this);
 			};
-			debounced(this, rexs.DecimalRegExp, e, callback);
+			debounced(this, namespaceScalsRexs.DecimalRegExp, e, callback);
 		},
 	},
 	{
@@ -66,7 +68,7 @@ const sList: Ref<Array<interfaceScaleListItem>> = ref([
 			let callback = function () {
 				calcScale(_this);
 			};
-			debounced(this, rexs.HexadecimalRegExp, e, callback);
+			debounced(this, namespaceScalsRexs.HexadecimalRegExp, e, callback);
 		},
 	},
 	{
@@ -78,7 +80,7 @@ const sList: Ref<Array<interfaceScaleListItem>> = ref([
 			let callback = function () {
 				calcScale(_this);
 			};
-			debounced(this, rexs.BinaryRegExp, e, callback);
+			debounced(this, namespaceScalsRexs.BinaryRegExp, e, callback);
 		},
 	},
 	{
@@ -90,7 +92,7 @@ const sList: Ref<Array<interfaceScaleListItem>> = ref([
 			let callback = function () {
 				calcScale(_this);
 			};
-			debounced(this, rexs.OctonaryRegExp, e, callback);
+			debounced(this, namespaceScalsRexs.OctonaryRegExp, e, callback);
 		},
 	},
 	{
@@ -102,7 +104,7 @@ const sList: Ref<Array<interfaceScaleListItem>> = ref([
 			let callback = function () {
 				calcScale(_this);
 			};
-			debounced(this, rexs.HexadecimalRegExp, e, callback);
+			debounced(this, namespaceScalsRexs.HexadecimalRegExp, e, callback);
 		},
 	},
 ]);
@@ -153,7 +155,7 @@ function selectBitlengthClick(item:bitlenInterface){
 	sList.value[sListItemIndx].val =sList.value[sListItemIndx].val.slice(len-selectBitlength.value); 
 	console.log('item :>> ',sList.value[sListItemIndx].val);
 	
-	//TODO 触发一次转换
+	// 触发一次转换
 	calcScale(sList.value[sListItemIndx]);
 }
 //Scale Functions//
@@ -181,7 +183,7 @@ function convertToOtherScaleAndSetVal(val: string, curScaleType: TypeScale) {
 		case "hexadecimal":
 			(this[0] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.Decimal);
 			(this[2] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.Binary);
-			(this[3] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.Octonary);
+			// (this[3] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.Octonary);
 			(this[4] as interfaceScaleListItem).val = HexadecimalToOther(val,selectBitlength.value,namespaceScales.IEEE_754);
 			CurrentInput.value = this[1] as interfaceScaleListItem;
 			break;
@@ -190,10 +192,14 @@ function convertToOtherScaleAndSetVal(val: string, curScaleType: TypeScale) {
 			(this[0] as interfaceScaleListItem).val = BinaryToOther(val,selectBitlength.value,namespaceScales.Decimal);
 			(this[1] as interfaceScaleListItem).val = BinaryToOther(val, selectBitlength.value, namespaceScales.Hexadecimal);
 			(this[3] as interfaceScaleListItem).val = BinaryToOther(val,selectBitlength.value,namespaceScales.Octonary);
-			(this[4] as interfaceScaleListItem).val = BinaryToOther(val,selectBitlength.value,namespaceScales.IEEE_754);
+			// (this[4] as interfaceScaleListItem).val = BinaryToOther(val,selectBitlength.value,namespaceScales.IEEE_754);
 			CurrentInput.value = this[2] as interfaceScaleListItem;
 			break;
 		case "octonary":
+			(this[0] as interfaceScaleListItem).val = OctonaryToOther(val,selectBitlength.value,namespaceScales.Decimal);
+			(this[1] as interfaceScaleListItem).val = OctonaryToOther(val, selectBitlength.value, namespaceScales.Hexadecimal);
+			(this[2] as interfaceScaleListItem).val = OctonaryToOther(val,selectBitlength.value,namespaceScales.Binary);
+
 			break;
 		case "IEEE_float":
 			break;
@@ -250,7 +256,6 @@ $selectHeight: 40px;
 				font-size: 20px;
 				padding: 2px;
 				min-height: 30px;
-				width: 360px;
 				max-width: 100%;
 				width: 65%;
 				min-width: 71px;

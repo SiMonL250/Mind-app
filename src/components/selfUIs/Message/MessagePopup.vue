@@ -7,11 +7,11 @@
 <script setup lang="ts">
 import { StyleValue } from "vue";
 import { onBeforeMount, onMounted,ref } from "vue";
-import {msgTypes} from './message'
+import {msgTypes, typeMessage} from './message'
 
 
 
-const message = defineProps<{ text: string,type?:string,style?:StyleValue}>();
+const message = defineProps<{ text: string,type?:typeMessage,style?:StyleValue}>();
 const messageRef = ref<null|HTMLElement>(null);
 const classess = ref(["message-container","normal"])
 onBeforeMount(()=>{

@@ -15,6 +15,7 @@ export interface interfaceMenuItemClickActionValType{
 	someString?:string,
 	someObject?:object,
 	someNumber?:number,
+	nodeId?:string,
 	position?:interfacePosition
 }
 export type typeItemClickAction =

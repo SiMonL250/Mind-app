@@ -7,8 +7,7 @@
 		<div
 			v-for="(item, ind) of props.menu.items"
 			:key="ind"
-			:class="['menu-items',item.event]"
-
+			:class="['menu-items', item.event]"
 			:data-has-sub="item.subMenu ? true : false"
 			@click="(e:PointerEvent)=>{
 				itemClickPos = {
@@ -19,7 +18,10 @@
 				if(item.clickEvent){
 					let _emitAction:typeItemClickAction = {
 						action:item.event ?? 'none',
-						val:{position:itemClickPos}
+						val:{
+							position:itemClickPos,
+							nodeId:treeNodeId
+						}
 					}
 					item.clickEvent(e ,()=>itemClickCallbackFunc(_emitAction)/*,　有callback可以在这里调用*/);
 				}
@@ -106,7 +108,7 @@ const itemClickCallbackFunc: typeItemClickCallback = (
 	_emitAction: typeItemClickAction
 ) => {
 	//callback 要把操作emit到App.vue
-	//  console.log("param :>> ", _emitAction);
+	 console.log("param :>> ", _emitAction);
 	contextMenuEmits(itemClickActionStr, _emitAction);
 };
 
