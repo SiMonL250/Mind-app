@@ -13,7 +13,7 @@ const app = createApp(App);
 app.use(Message)
 .use(Loading)
 .use(pinia)
-.mount('#app')
+.mount('#app');
 
 
 //console.log('? :>> ',  app.component('contextMenu'));

@@ -146,20 +146,23 @@ export function insertSiblingNode(
 	}
 }
 
-export function deleteNode(tree: MindNode, nodeId: typeNodeId): MindNode {
+export function deleteNode(tree: MindNode, nodeId: typeNodeId) {
 	//返回操作后的树
-	if (!tree || !nodeId) return null;
-	// if (tree.data.id === nodeId) return;
-	for (let i = 0; i < tree.children.length; i++) {
-		if (tree.children[i].data.id === nodeId) {
-			tree.children.splice(i, 1);
-			return tree;
-		}
-        else{
-            return deleteNode(tree.children[i].children[i],nodeId)
-        }
-	}
-    return tree;
+	if (!tree) return null;
+	if (!nodeId) throw new Error("null param while delete tree node");
+
+	tree.children = tree.children
+		.map((child) => {
+			const result = deleteNode(child, nodeId);
+			// 如果子节点被删除（返回null），则不包含在新的children数组中
+			return result === null ? null : result;
+		})
+		.filter((child) => (child !== null && child.data.id!==nodeId));
+		
+	// 返回更新后的节点
+	return tree;
+
+	// return tree;
 }
 
 export function updateNodeProperty(

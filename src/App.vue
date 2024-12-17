@@ -298,7 +298,7 @@ function contextMenuItemClickHandleFunc(itemClickAction: typeItemClickAction) {
 	if (!treeRightClickAction.value.val) {
 		return;
 	}
-	console.log("itemClickAction :", itemClickAction);
+	// console.log("itemClickAction :", itemClickAction);
 	// console.log("itemClickAction :>> ", itemClickAction);
 	let nodeActionToDo: string = itemClickAction.action;
 	if (nodeActionToDo) {
@@ -326,11 +326,10 @@ function contextMenuItemClickHandleFunc(itemClickAction: typeItemClickAction) {
 					return;
 				}else{
 					MindFile.value.mindNode = deleteNode(MindFile.value.mindNode,nodeId);
-					console.log('MindFile.value.mindNode :>> ', MindFile.value.mindNode);
 					console.dir(findMindNodebyId(MindFile.value.mindNode,nodeId));
 				}
 				break;
-
+				
 			case "set-priority":
 				break;
 

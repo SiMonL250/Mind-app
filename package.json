@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "leader-line-vue": "^2.1.1",
-    "vue": "^3.4.31"
+    "vue": "^3.4.31",
+    "vue3-popper": "^1.5.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.2",
