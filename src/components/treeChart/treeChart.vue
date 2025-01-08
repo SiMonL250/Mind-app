@@ -9,7 +9,10 @@
 			<div
 				:class="{
 					treeNode: true,
+					isFocusedNode:props?.focusedId && props?.focusedId===node.data.id
 				}"
+				:hasson="node.children && (node.children.length>0)" 
+				:hasfather="getFatherNode(treeRoot,node) !==null " 
 				:id="node.data.id"
 				ref="curNodeEle"
 				@contextmenu="
@@ -17,8 +20,9 @@
 						rightClick(e as PointerEvent, node);
 					}
 				"
+				@click="nodeClickHandle"
 			>
-				<!-- TODO  focused on node  -->
+			
 				{{ node.data.text }}
 			</div>
 		</div>
@@ -35,9 +39,10 @@
 				v-for="(n, ind) in node.children"
 				:key="ind"
 				:node="n"
+				:focused-id="props?.focusedId"
 				:treeRoot="treeRoot"
-				:isMainScroll="isMainScroll"
-				@node-right-click="EmitFromChild"
+				@node-right-click="(action)=>EmitFromChild(NameSpaceNodeOperate.NodeRightClick,action)"
+				@node-left-click="(action)=>EmitFromChild(NameSpaceNodeOperate.NodeLeftClick,action)"
 			></treeChart>
 		</div>
 	</div>
@@ -45,44 +50,28 @@
 
 <script setup lang="ts">
 import treeChart from "./treeChart.vue";
-import { MindNode, getFatherNode } from "../../interfaces/MindNodeProperty";
+import { MindNode, getFatherNode, typeNodeId } from "../../interfaces/MindNodeProperty";
 import {
-	interfaceChildAndFatherProp,
-	LeadLineOptions,
+interfaceNodeProp,
 	typeTreeNodeRightClickValType,
 } from "./tree";
 import { ref, onMounted, onUnmounted } from "vue";
-import LeaderLine from "leader-line-vue";
-import { watch } from "vue";
 import {
 	NameSpaceNodeOperate,
 	interfaceEmitsAction,
 } from "../../hooks/operate";
-import { menuProps } from "../selfUIs/ContextMenu/contextMenu";
+// import { menuProps } from "../selfUIs/ContextMenu/contextMenu";
 //props and variables
-
-const treeProp = defineProps<{
+type typeNodeEvent = "node-right-click" | "node-left-click";
+const props = defineProps<{
 	node: MindNode;
 	treeRoot: MindNode;
-	isMainScroll: boolean;
+	focusedId?:typeNodeId
 }>();
-const emits = defineEmits([NameSpaceNodeOperate.NodeRightClick]);
+const emits = defineEmits([NameSpaceNodeOperate.NodeRightClick,NameSpaceNodeOperate.NodeLeftClick]);
 const curNodeEle = ref(null);
-let line: LeaderLine;
-let childAndFatherProp: interfaceChildAndFatherProp;
 
 /* events methods */
-// window.addEventListener(
-// 	"resize",
-// 	() => {
-// 		try {
-// 			line?.position();
-// 		} catch (e) {}
-
-// 		// 好像有bug？？
-// 	},
-// 	false
-// );
 
 function rightClick(e: PointerEvent, node: MindNode) {
 	// console.log("e :>> ", e);
@@ -101,85 +90,27 @@ function rightClick(e: PointerEvent, node: MindNode) {
 	emits(NameSpaceNodeOperate.NodeRightClick, action);
 }
 function EmitFromChild(
-	action: interfaceEmitsAction<{ menu: menuProps; treeNode: MindNode }>
+	Event:typeNodeEvent,
+	action: any//interfaceEmitsAction<{ menu: menuProps; treeNode: MindNode }>
 ) {
-	emits(NameSpaceNodeOperate.NodeRightClick, action);
+	emits(Event, action);
+}
+function nodeClickHandle(){
+	let action:interfaceEmitsAction<interfaceNodeProp> = {
+		action:NameSpaceNodeOperate.NodeLeftClick,
+		val:{
+			id:props.node.data.id
+		}
+	}
+	emits(NameSpaceNodeOperate.NodeLeftClick,action);
 }
 /* live hooks */
-watch(
-	() => treeProp.isMainScroll,
-	(newVal, oldVal) => {
-		if (newVal !== oldVal) {
-			
-			line?.position();
-		}
-	}
-);
-// watch(
-// 	() => treeProp.node?.data.text,
-// 	(newVal, oldVal) => {
-// 		console.log('newVal != oldVal :>> ',newVal,oldVal, newVal !== oldVal);
-// 		if (newVal != oldVal) {
-// 			line?.position();
-
-// 			//TODO 还要监听父、子，然后重绘
-// 		}
-// 		// line?.position();
-// 	}
-// );
-
 onMounted(() => {
-	getNodeAndFatherProp();
-	//console.dir( childAndFatherPos);
-	drawByLeaderLine();
-	line?.show('draw',{duration:1200,timing:"ease-in-out"})
+	
 });
-function getNodeAndFatherProp() {
-	let fatherNode: MindNode;
 
-	if (treeProp.node) {
-		fatherNode = getFatherNode(treeProp.treeRoot, treeProp.node);
-		if (fatherNode) {
-			childAndFatherProp = {
-				child: {
-					id: treeProp.node.data.id,
-				},
-				father: {
-					id: fatherNode.data.id, // get canvas by this id
-				},
-			};
-		}
-	}
-}
-
-function drawByLeaderLine() {
-	if (
-		!childAndFatherProp &&
-		!childAndFatherProp?.child &&
-		!childAndFatherProp?.father
-	) {
-		return;
-	}
-
-	let option: LeadLineOptions = {
-		startPlug: "disc",
-		endPlug: "disc",
-		size: 2,
-		startSocket: "bottom",
-		endSocket: "top",
-		color: "#bbb",
-		path: "fluid",
-		// positionByWindowResize:true,
-	};
-	line = LeaderLine.setLine(
-		document.getElementById(childAndFatherProp.father.id),
-		curNodeEle.value,
-		option
-	);
-	line.hide('none')
-}
 onUnmounted(() => {
-	line?.remove();
+	
 });
 
 defineExpose({});
@@ -193,6 +124,7 @@ $colorNodeBkg: #fafafa;
 	width: fit-content;
 	box-sizing: border-box;
 	user-select: none;
+	margin: 0 10px 0 0 ;
 }
 .parentLevel {
 	width: fit-content;
@@ -200,21 +132,43 @@ $colorNodeBkg: #fafafa;
 }
 .childLevel {
 	display: flex;
-	margin-top: 20px;
+	//margin-top: 20px;
 	box-sizing: border-box;
+	border-top: 1px solid grey;
+
 }
 .treeNode {
 	width: fit-content;
 	max-width: 120px;
 	border: 1px solid $nodeBorderColor;
 	border-radius: 5px;
-	margin: 15px 0.2em 0 0;
+	margin: 14px auto 10px auto;
 	text-align: center;
 	box-sizing: border-box;
 	padding: 5px;
 	background-color: $colorNodeBkg;
 	word-wrap: break-word;
+	position: relative;
 	cursor: pointer;
+	&[hasfather = true]::before{
+		content: "|";
+		position: absolute;
+		top:-19px;
+		left: 50%;
+		box-sizing: border-box;
+	}
+	&[hasSon=true]::after{
+		content: "|";
+		position: absolute;
+		font-size: 12px;
+		bottom:-13px;
+		left: 50%;
+		box-sizing: border-box;
+	}
+}
+.isFocusedNode{
+	box-shadow: 3px -3px 4px $nodeBorderColor;
+	transition: .15s;
 }
 .focused {
 	border-color: aqua;

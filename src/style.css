@@ -27,8 +27,8 @@
   --color-messagebkg-warning:#faecd8;
 
 
-  --popper-theme-background-color: #33333396;
-  --popper-theme-background-color-hover: #33333396;
+  --popper-theme-background-color: #333333c4;
+  --popper-theme-background-color-hover: #333333c4;
   --popper-theme-text-color: #ffffff;
   --popper-theme-border-width: 0px;
   --popper-theme-border-style: solid;
@@ -45,7 +45,7 @@ body{
   overflow: hidden;
 }
 .leader-line{
-  z-index: -2;
+  z-index: 999;
 }
 
 

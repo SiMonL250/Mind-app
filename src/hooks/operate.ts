@@ -1,45 +1,47 @@
 import { MindNode } from "../interfaces/MindNodeProperty";
-import { showLoading,hideLoading } from "../components/selfUIs/Loading/loading";
+import {
+	showLoading,
+	hideLoading,
+} from "../components/selfUIs/Loading/loading";
 
 /*
 	file operate and node operates 
 
 */
 
-/*NAMESPACE START  */ 
+/*NAMESPACE START  */
 export namespace NameSpaceFileOperation {
 	export const changeMindName = "change-mindname";
 	export const openFile = "open-file";
 	export const createNewFile = "create-file";
 	export const saveFile = "save-file";
-
-	
 }
 
-export namespace NameSpaceNodeOperate{
-	export const NodeAction= "node-action";
+export namespace NameSpaceNodeOperate {
+	export const NodeAction = "node-action";
 
-	export const NodeRightClick = "node-right-click"
+	export const NodeRightClick = "node-right-click";
+	export const NodeLeftClick = "node-left-click";
 
 	export const redo = "redo";
-    export const undo = "undo";
-    export const insertNodeChild = "insert-child";
+	export const undo = "undo";
+	export const insertNodeChild = "insert-child";
 	export const insertNodeParent = "insert-parent";
 	export const insertNodeSibling = "insert-sibling";
-    export const moveUp = "move-up";
+	export const moveUp = "move-up";
 	export const moveDown = "move-down";
-    export const editText = "edit-text";
-    export const deleteNode = "delete-node";
-    export const setPriority = "set-priority";
+	export const editText = "edit-text";
+	export const deleteNode = "delete-node";
+	export const setPriority = "set-priority";
 }
 
-export namespace NameSpaceOtherOperation{
-	export const switchTool = 'switch-tool';
+export namespace NameSpaceOtherOperation {
+	export const switchTool = "switch-tool";
 	export const showModal = "show-modal";
 	export const closeModal = "close-modal";
 }
-/*NAMESPACE END  */ 
-/*ENUMS START  */ 
+/*NAMESPACE END  */
+/*ENUMS START  */
 export enum EnumReconiteCode {
 	MindJson = "type-mind-json",
 }
@@ -56,15 +58,16 @@ export enum EnumDirectoryWellknow {
 	videos = "videos",
 }
 /*ENUMS  END  */
-/*INTERFACE START  */ 
+/*INTERFACE START  */
 export interface interfaceEmitsAction<T> {
-	action:string,
-	val?:T
+	action: string;
+	val?: T;
 }
 export interface mindFileContent {
 	reconicode: EnumReconiteCode;
 	mindName: string;
 	mindNode: MindNode;
+	fileName?: string;
 }
 interface filePickerOptions {
 	startIn?: FileSystemHandle | EnumDirectoryWellknow;
@@ -90,9 +93,11 @@ interface fileSaveOptions {
 }
 /*INTERFACE  END  */
 
-
 //this function return Node property object, then topbar emit this object
-export async function handleOpenFile(): Promise<{mind:mindFileContent ,fileName:string}| null> {
+export async function handleOpenFile(): Promise<{
+	mind: mindFileContent;
+	fileName: string;
+} | null> {
 	try {
 		// 定义文件选择器的选项
 		const options: filePickerOptions = {
@@ -122,12 +127,11 @@ export async function handleOpenFile(): Promise<{mind:mindFileContent ,fileName:
 
 		return reconicode &&
 			Object.values(EnumReconiteCode).includes(reconicode)
-			? {mind:Mind,fileName:file.name}
+			? { mind: Mind, fileName: file.name }
 			: null;
 	} catch (error) {
 		//console.error(error);
 		throw error;
-		
 	}
 }
 
@@ -172,17 +176,17 @@ function createEmptyMindFileContent(
 		},
 	};
 }
-//save file  and create file , 
+//save file  and create file ,
 //save操作fileObject和fileName不能为空
 export async function handleNewAndSaveFile(
-	fileName?:string,
+	fileName?: string,
 	fileObject?: mindFileContent
 ): Promise<mindFileContent | null> {
 	let date = new Date();
-	let MindName = 'Mind'+date.getTime();
+	let MindName = "Mind" + date.getTime();
 	try {
 		const option: fileSaveOptions = {
-			suggestedName: fileName?fileName:MindName,
+			suggestedName: fileName ? fileName : MindName,
 			types: [
 				{
 					description: "",
@@ -209,10 +213,10 @@ export async function handleNewAndSaveFile(
 			FileSystemFileHandle -> FileSystemWritableStream -> write() ->close stream
 		*/
 
-		Writable.write(JSON.stringify(fileContent)).then(()=>{
+		Writable.write(JSON.stringify(fileContent)).then(() => {
 			showLoading();
 		});
-		await Writable.close().finally(()=>{
+		await Writable.close().finally(() => {
 			hideLoading();
 		});
 		return fileContent;
@@ -220,4 +224,21 @@ export async function handleNewAndSaveFile(
 		//console.error(e);
 		throw error;
 	}
+}
+
+export const ArrayWhiteNameClassesWhenClickTounFoucused: Array<string> = [
+	"treeNode",
+	"items-btn",
+	"menu-items",
+	"float-input"
+];
+export function DidDomTokenListContainsArrayEle(
+	DomTokens: DOMTokenList,
+	arr: Array<any>
+) {
+	return (
+		Array.from(DomTokens).filter(function (item) {
+			return arr.includes(item);
+		}).length >= 1
+	);
 }

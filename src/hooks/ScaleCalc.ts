@@ -3,6 +3,7 @@ import { TypeScale } from "../components/otherTools/HexBinDecOct";
 //TODO 太大的数会出错,因为超出了 JavaScript 能够安全表示的整数范围。
 export type typeBitLength = 64 | 32 | 16 | 8;
 type scaleFunc = (raw: string, bits?: typeBitLength, s?: TypeScale) => string;
+type scaleFunc1 = (raw: string,  s?: TypeScale) => string;
 
 export namespace bitLength {
 	export const QWord: typeBitLength = 64;
@@ -60,17 +61,21 @@ const scaleCharsHashArray: scaleChars[] = [
 	"E",
 	"F",
 ];
-
 interface interfaceBinaryFraction {
 	integerPart: binaryArray;
 	fractionPart: binaryArray;
-	power: number;
+	exponent: number;
 	//integerPart.fractionPart * 2^power;
 }
 export type binaryArray = Array<binarybit>;
 type binary2DArray = Array<Array<binarybit>>;
 export type scaleCharsArray = Array<scaleChars>;
 
+
+export const checkIsStringHex = function (raw: string) {
+	if (!raw) return false;
+	return namespaceScalsRexs.HexadecimalRegExp.test(raw);
+};
 function divideArray(arr: binaryArray, itemsPerGroup: number): binary2DArray {
 	let chunks: binary2DArray = [];
 	for (let i = arr.length; i > 0; i -= itemsPerGroup) {
@@ -123,11 +128,22 @@ function trimFrontZeroOfArray(arr: any, remainLen?: number): any[] {
 	return arr;
 }
 
+
+const HexStrToBinaryArr = function (raw: string) {
+	let arr:binary2DArray = Array.from(raw.toLocaleUpperCase().split(''),(ch)=>{
+		 let a = parseInt(ch,16).toString(2).split('') as binaryArray;
+		 return new Array<binarybit>(4-a.length).fill('0').concat(a) as binaryArray;
+	});
+	return arr.reduce((acc, cur) => acc.concat(cur), []);
+};
+
 export function decimalToOther(
 	raw: string,
 	bits: typeBitLength /* 根据这个确定最后是字节、字、双字等 */,
 	s: TypeScale /*进制(10进制除外)，根据这个把 bitsArray分组*/
 ) {
+	console.log('?? :>> ',raw, s);
+
 	let groupItemCounts: number;
 	switch (
 		s //only 2**n 进制
@@ -182,7 +198,7 @@ export const decimalToIEEE: scaleFunc = function (raw: string) {
 			binaryFractionToNormalized.integerPart;
 		let fractionPartArr: binaryArray =
 			binaryFractionToNormalized.fractionPart;
-		let pow: number = binaryFractionToNormalized.power;
+		let pow: number = binaryFractionToNormalized.exponent;
 
 		if (integerPartArr.length === 1) {
 			if (integerPartArr.lastIndexOf("1") === 0) {
@@ -207,7 +223,7 @@ export const decimalToIEEE: scaleFunc = function (raw: string) {
 		return {
 			integerPart: ["1"],
 			fractionPart: fractionPartArr,
-			power: pow,
+			exponent: pow,
 		};
 	}
 	let strArr = raw.split(".");
@@ -253,15 +269,15 @@ export const decimalToIEEE: scaleFunc = function (raw: string) {
 	let binaryFraction: interfaceBinaryFraction = {
 		integerPart: integerBinaryArr,
 		fractionPart: fractionArray,
-		power: 0,
+		exponent: 0,
 		//str:
 	};
 
 	//标准化 变成1.xxx * 2^n 的形式
 	let normalized = normalization(binaryFraction);
-	// TODO 决定尾数位(23bits)和指数位(8bits)
+	//  决定尾数位(23bits)和指数位(8bits)
 
-	let exponent = normalized.power + bias;
+	let exponent = normalized.exponent + bias;
 	if (exponent < 1 || exponent > 254) {
 		T = new Array<binarybit>(8).fill("0");
 	} else {
@@ -445,3 +461,33 @@ export const OctonaryToOther: scaleFunc = function (
 		}
 	}
 };
+
+
+
+export const IEEEToDecimal:scaleFunc1 = function(raw:string,_scale:TypeScale){
+	if(!checkIsStringHex(raw))return ;
+	if(raw.length<8) return;
+	let binArr:binaryArray = HexStrToBinaryArr(raw) as binaryArray;
+	let S: binaryArray = binArr[0] as unknown as binaryArray; //符号码
+	let T: binaryArray =binArr.slice(1,9); //阶码
+	let M: binaryArray = binArr.slice(9); //尾数
+	const bias = 2 ** (T.length - 1) - 1;
+	let exponent = parseInt(T.join(''), 2) - bias;
+
+	let fraction:interfaceBinaryFraction ={
+		integerPart:['1'],
+		fractionPart:M,
+		exponent:exponent,
+	}
+
+	let num = parseInt(fraction.integerPart[0]);
+	let exp = -1;
+	for(let i of fraction.fractionPart){
+		num+=parseInt(i) * (2)**exp;
+		exp--;
+	}
+
+
+	return (S[0]==='0'?num:-num).toString();
+	
+}

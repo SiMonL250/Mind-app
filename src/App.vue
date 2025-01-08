@@ -3,12 +3,14 @@
 		<section class="topbar-section">
 			<TopbarView
 				v-model="MindFile.mindName"
+				:fileName="MindFile.fileName"
+				:button-disabled="topBarButtonsDisabled"
 				@change-mindname="(newName:string)=>changeMindNameHandle(newName)"
 				@open-file="openFileHandle"
 				@save-file="saveFileHandle"
 				@create-file="createFileHandle"
 				@show-modal="
-					(action:typeSHowModalAction) => {
+					(action:typeShowModalAction) => {
 						if(action.val.type === 'tools'){
 							isShowModal = action?.val.show;
 						}
@@ -23,8 +25,8 @@
 		<section
 			class="main-section"
 			@scroll="
-				() => {
-					isMainScroll = !isMainScroll;
+				(e) => {
+					decideToShowFloatingThing(e);
 				}
 			"
 		>
@@ -32,8 +34,9 @@
 			<treeChart
 				:node="MindFile.mindNode"
 				:treeRoot="MindFile.mindNode"
-				:is-main-scroll="isMainScroll"
 				:is-text-change="isTextChange"
+				:focused-id="focusNode.getId"
+				@node-left-click="NodeLeftClickHandle"
 				@node-right-click="(action:interfaceEmitsAction<typeTreeNodeRightClickValType>)=>{
 					//console.log('action :>> ', action.val.target);
 					//用action.val.target 修改class 更改样式
@@ -44,10 +47,10 @@
 				}"
 				ref="treeChartRef"
 			/>
-			<!-- TODO focused node 特殊显示 -->
+
 		</section>
 		<Modal
-			:show="isShowModal /* true*/"
+			:show="isShowModal /*   true*/"
 			@close-modal="(action:interfaceEmitsAction<boolean>)=>{isShowModal = action.val}"
 		>
 			<template #title>
@@ -110,11 +113,13 @@ import {
 	handleOpenFile,
 	handleNewAndSaveFile,
 	interfaceEmitsAction,
+	DidDomTokenListContainsArrayEle as DomTokenListContainsArrayEle,
+	ArrayWhiteNameClassesWhenClickTounFoucused,
 } from "../src/hooks/operate";
 import { FileStore } from "../src/store/MindFileStore";
 import { focusNodeStore } from "./store/focusNodStore";
 import { local, mindLocalKey } from "../src/hooks/localStorage.ts";
-import { sidebarProps, toolTypes } from "./interfaces/ComponentProperty";
+import { sidebarItemList, toolTypes } from "./interfaces/ComponentProperty";
 import ContextMenu from "./components/selfUIs/ContextMenu/ContextMenu.vue";
 import FloatInputBlank from "./components/selfUIs/FloatInputBlank/FloatInputBlank.vue";
 import {
@@ -126,17 +131,27 @@ import {
 	interfaceFloatInputProperty,
 	typeInputBlankEmitsAction,
 } from "./components/selfUIs/FloatInputBlank/floatInputBlank";
-import { typeTreeNodeRightClickValType } from "./components/treeChart/tree";
-import { typeSHowModalAction } from "./components/topbars/topbar";
+import {
+	interfaceNodeProp,
+	typeTreeNodeRightClickValType,
+} from "./components/treeChart/tree";
+import {
+	interfacebuttonsDisabled,
+	typeShowModalAction,
+} from "./components/topbars/topbar";
 import {
 	KeyPropertyText,
 	deleteNode,
-	findMindNodebyId,
 	getFatherNodeByChildId,
+	insertChildNode,
+	insertFatherNode,
+	insertSiblingNode,
 	typeNodeId,
 	updateNodeProperty,
+	findMindNodebyId,
 } from "./interfaces/MindNodeProperty";
 import { typeMessage } from "./components/selfUIs/Message/message";
+import { watch } from "vue";
 
 /* defines and variables  */
 const instance = getCurrentInstance();
@@ -147,11 +162,11 @@ interface localStoredType {
 //pinia store
 const fileStore = FileStore();
 const focusNode = focusNodeStore();
-const isMainScroll = ref(false);
 let MindFile = ref<mindFileContent>({
 	reconicode: EnumReconiteCode.MindJson,
 	mindName: "Mind",
 	mindNode: null,
+	fileName: "",
 });
 const floatinputProp: Ref<interfaceFloatInputProperty> = ref({
 	position: { clientX: 0, clientY: 0 },
@@ -161,13 +176,14 @@ const isShowFloatInput = ref(false);
 const isShowModal = ref(false);
 const isTextChange = ref(false);
 const isShowShortCut = ref(false);
-const sidebarItemList: sidebarProps[] = [
-	{
-		toolType: toolTypes.HexBinDecOct,
-		innerText: `${toolTypes.HexBinDecOct}`,
-	},
-	{ toolType: toolTypes.CrcCheck, innerText: "Crc Check" },
-];
+
+const topBarButtonsDisabled: Ref<interfacebuttonsDisabled> = ref({
+	undoRedoDisabled: true,
+	insertDisabled: true,
+	editTextAndDeleteDisabled: true,
+	upAndDownDisabled: true,
+	setPriorityDisabled: true,
+});
 const curTool: Ref<toolTypes> = ref(toolTypes.CrcCheck);
 
 const treeChartRef = ref(null);
@@ -191,8 +207,6 @@ const showContextMenu = ref(false);
 function newTextHandle(action: typeInputBlankEmitsAction) {
 	// console.log("action :>> ", action);
 	if (!action.val) return;
-	//TODO 修改节点文字 之后要触发【线条重绘】，
-	//要触发【线条重绘】就类似“发送命令”给组件的形式
 	//prop emits 还是 defineExpose
 	updateNodeProperty(
 		MindFile.value.mindNode,
@@ -212,7 +226,10 @@ function openFileHandle() {
 			console.error("what happened? ", fileRes);
 		} else {
 			let fileName = fileRes.fileName;
-			MindFile.value = fileRes.mind;
+			MindFile.value.mindName = fileRes.mind.mindName;
+			MindFile.value.mindNode = fileRes.mind.mindNode;
+			MindFile.value.reconicode = fileRes.mind.reconicode;
+			MindFile.value.fileName = fileName;
 			fileStore.setFileName(fileName);
 			fileStore.setfileContent(MindFile.value);
 			//console.log('father :>> ',getFatherNode(MindFile.value.mindNode,"d33vks5u6ow0"));
@@ -228,28 +245,63 @@ function createFileHandle() {
 	handleNewAndSaveFile();
 }
 function nodeAction(action: interfaceEmitsAction<string>) {
+	// TODO 完善这里的功能
 	console.log("action :>> ", action);
 }
 
 document.body.addEventListener("click", (e: PointerEvent) => {
 	decideToShowFloatingThing(e);
+	decideToKeepFocusedNodeWhenLeftClick(e);
 });
 document.body.addEventListener("contextmenu", (e: PointerEvent) => {
 	let target: Element = e.target as Element;
 	if (target.className == "menu-items") {
 		e.preventDefault();
 	}
+	console.log("contextmenu :>> ", target.classList);
 	decideToShowFloatingThing(e);
 });
+function NodeLeftClickHandle(action: interfaceEmitsAction<interfaceNodeProp>) {
+	if (!action.val.id) {
+		showMessage("why id is null??", "error");
+		throw "why id is null??";
+	}
+	if (action.val.id === focusNode.getId) {
+		focusNode.focusedNode = null;
+		return;
+	}
+	focusNode.focusedNode = findMindNodebyId(
+		MindFile.value.mindNode,
+		action.val.id
+	);
+
+}
 /* Even handle function  */
 /* live Hooks  */
 onMounted(() => {
 	storeAndMindInit();
 });
+watch(
+	() => focusNode.focusedNode,
+	(_new, _old) => {
+		if (_new) {
+			topBarButtonsDisabled.value.editTextAndDeleteDisabled = false;
+			topBarButtonsDisabled.value.insertDisabled = false;
+			topBarButtonsDisabled.value.setPriorityDisabled = false;
+			topBarButtonsDisabled.value.upAndDownDisabled = false;
+		} else {
+			topBarButtonsDisabled.value.editTextAndDeleteDisabled = true;
+			topBarButtonsDisabled.value.insertDisabled = true;
+			topBarButtonsDisabled.value.setPriorityDisabled = true;
+			topBarButtonsDisabled.value.upAndDownDisabled = true;
+		}
+	}
+);
 /* live Hooks  */
 /* other functions  */
 function showMessage(text: string, type?: typeMessage, remainMS?: number) {
-	instance.proxy.$message(text, type, remainMS); //有要显示的错误就emit上来就行了
+	instance.proxy.$message(text, type, remainMS);
+	//有要显示的错误就emit上来就行了
 }
 const test = function () {
 	showMessage("fuck");
@@ -262,7 +314,8 @@ function storeAndMindInit() {
 		fileStore.setfileContent(localContent.fileContent);
 	}
 }
-function decideToShowFloatingThing(e: PointerEvent) {
+function decideToShowFloatingThing(e: PointerEvent | Event) {
+	//TODO 可能会有需要完善的
 	let target: Element = e?.target as Element;
 	//floating input
 	if (e.type === "click") {
@@ -275,32 +328,70 @@ function decideToShowFloatingThing(e: PointerEvent) {
 		// console.log("target.className :>> ", target);
 		if (
 			target instanceof HTMLElement &&
-			!target?.className.includes("float-input-container") &&
-			!target?.className.includes("float-input") &&
-			!target?.className.includes("edit-text")
+			!DomTokenListContainsArrayEle(target.classList, [
+				"edit-text",
+				"float-input-container",
+				"float-input",
+			])
 		) {
 			isShowFloatInput.value = false;
+		}
+
+		if (
+			!DomTokenListContainsArrayEle(target.classList, [
+				"treeNode",
+				"float-input",
+				"menu-items",
+				"conetext-menu-containner",
+			])
+		) {
+			showContextMenu.value = false;
+		} else {
+			if (target.classList.contains("delete-node")) {
+				showContextMenu.value = false;
+			} else {
+				showContextMenu.value = true;
+			}
 		}
 	}
 	if (e.type === "contextmenu") {
 		if (!target.className.includes("float-input")) {
 			isShowFloatInput.value = false;
 		}
+		if (
+			DomTokenListContainsArrayEle(target.classList, [
+				"treeNode",
+				"float-input",
+			])
+		) {
+			showContextMenu.value = true;
+		} else {
+			showContextMenu.value = false;
+		}
 	}
-	// context menu
-	if (target.className == "treeNode") return;
-	if ((target as HTMLElement).dataset.hasSub === "true") {
-		return;
+	if (e.type == "scroll") {
+		showContextMenu.value = false;
+		isShowFloatInput.value = false;
 	}
-	showContextMenu.value = false;
+}
+function decideToKeepFocusedNodeWhenLeftClick(e: PointerEvent) {
+	let el = e.target as HTMLElement;
+	if (
+		!DomTokenListContainsArrayEle(
+			el.classList,
+			ArrayWhiteNameClassesWhenClickTounFoucused
+		)
+	) {
+		focusNode.focusedNode = null;
+	}
 }
 function contextMenuItemClickHandleFunc(itemClickAction: typeItemClickAction) {
 	if (!treeRightClickAction.value.val) {
 		return;
 	}
-	// console.log("itemClickAction :", itemClickAction);
-	// console.log("itemClickAction :>> ", itemClickAction);
+	console.log("itemClickAction :", itemClickAction);
 	let nodeActionToDo: string = itemClickAction.action;
+	let nodeId: typeNodeId = itemClickAction.val.nodeId as typeNodeId;
 	if (nodeActionToDo) {
 		switch (nodeActionToDo) {
 			case "edit-text":
@@ -313,9 +404,6 @@ function contextMenuItemClickHandleFunc(itemClickAction: typeItemClickAction) {
 				break;
 
 			case "delete-node":
-				let nodeId: typeNodeId = itemClickAction.val
-					.nodeId as typeNodeId;
-				
 				if (!nodeId) {
 					showMessage("null node id!", "error");
 					return;
@@ -324,22 +412,39 @@ function contextMenuItemClickHandleFunc(itemClickAction: typeItemClickAction) {
 				if (!getFatherNodeByChildId(MindFile.value.mindNode, nodeId)) {
 					showMessage("root can`t be delete!", "warning");
 					return;
-				}else{
-					MindFile.value.mindNode = deleteNode(MindFile.value.mindNode,nodeId);
-					console.dir(findMindNodebyId(MindFile.value.mindNode,nodeId));
+				} else {
+					MindFile.value.mindNode = deleteNode(
+						MindFile.value.mindNode,
+						nodeId
+					);
+					// console.dir(findMindNodebyId(MindFile.value.mindNode,nodeId));
 				}
 				break;
-				
-			case "set-priority":
-				break;
-
 			case "insert-child":
+				insertChildNode(MindFile.value.mindNode, nodeId);
 				break;
 
 			case "insert-parent":
+				if (!getFatherNodeByChildId(MindFile.value.mindNode, nodeId)) {
+					showMessage("root dosen`t have parent!", "warning");
+					return;
+				}
+				insertFatherNode(MindFile.value.mindNode, nodeId);
 				break;
 
 			case "insert-sibling":
+				if (!getFatherNodeByChildId(MindFile.value.mindNode, nodeId)) {
+					showMessage("root dosen`t have sibling!", "warning");
+					return;
+				}
+				insertSiblingNode(MindFile.value.mindNode, nodeId);
+				break;
+			case "set-priority":
+				console.log(
+					"priority :>> ",
+					nodeId,
+					itemClickAction.val.someString
+				);
 				break;
 			default:
 				break;

@@ -1,5 +1,5 @@
 import { Ref } from "vue";
-import { namespaceScalsRexs,binaryArray } from "../../../hooks/ScaleCalc";
+import { checkIsStringHex } from "../../../hooks/ScaleCalc";
 
 export type typeCrcClass =
 	| ""
@@ -64,23 +64,16 @@ export interface interfaceCrcClassKeyVal {
 
 type crcFuncType = (raw: string, crcType?: typeCrcClass) => any;
 
-const checkIsOptionsCorrect: crcFuncType = function (raw: string) {
-	if (!raw) return false;
-	return namespaceScalsRexs.HexadecimalRegExp.test(raw);
-};
 
-const HexStrToBinaryArr: crcFuncType = function (raw: string) {
-	if (!checkIsOptionsCorrect(raw)) return -1;
-	const binaryArr: binaryArray = [];
-	
-	return binaryArr;
-};
+
+
 
 export const calcCrc: crcFuncType = function (raw: string) {
-	if (!checkIsOptionsCorrect(raw)) return;
+	if (!checkIsStringHex(raw)) return;
 	console.log("raw :>> ", raw);
 };
 
 export const checkCrcCorrect: crcFuncType = function (raw: string) {
-	if (!checkIsOptionsCorrect(raw)) return;
+	if (!checkIsStringHex(raw)) return;
 };
+

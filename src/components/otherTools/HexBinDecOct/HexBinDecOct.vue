@@ -45,6 +45,7 @@ decimalToIEEE,
 HexadecimalToOther,
 BinaryToOther,
 OctonaryToOther,
+IEEEToDecimal,
 } from "../../../hooks/ScaleCalc";
 const sList: Ref<Array<interfaceScaleListItem>> = ref([
 	{
@@ -202,6 +203,7 @@ function convertToOtherScaleAndSetVal(val: string, curScaleType: TypeScale) {
 
 			break;
 		case "IEEE_float":
+			(this[0] as interfaceScaleListItem).val =IEEEToDecimal(val,namespaceScales.Decimal);
 			break;
 		default:
 			break;
@@ -259,7 +261,7 @@ $selectHeight: 40px;
 				max-width: 100%;
 				width: 65%;
 				min-width: 71px;
-				height: 68px;
+				height: 48px;
 				outline: none;
 				display: block;
 			}

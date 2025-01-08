@@ -1,8 +1,22 @@
 <template>
 	<div class="topbar">
 		<div class="action-section file-section">
-			<div class="name-area">
-				<div class="label">Mind:</div>
+			<div
+				class="name-area"
+				ref="nameArea"
+				@mouseover="nameMouseOverHandle"
+			>
+				<Tooltip :showTip="showTip" :tipAlign="'bottom'" ref="tooltips" label="file name">
+					<!-- TODO align的计算 -->
+					<template #body>
+						<div class="label" @mouseenter="()=>{showTip = true}" @mouseleave="()=>{showTip = false}">
+							MindName:
+						</div>
+					</template>
+					<template #tip>
+							{{props.fileName}}
+					</template>
+				</Tooltip>
 				<input
 					class="mind-name"
 					v-model="model"
@@ -29,14 +43,14 @@
 		<div class="action-section nav-action" @click="(e) => NodeAction(e)">
 			<div class="nav-items redo-and-undo">
 				<button
-					:disabled="props.redoDisable"
+					:disabled="props.buttonDisabled.undoRedoDisabled"
 					class="undo items-btn"
 					:data-action="NameSpaceNodeOperate.redo"
 				>
 					👉
 				</button>
 				<button
-					:disabled="props.redoDisable"
+					:disabled="props.buttonDisabled.undoRedoDisabled"
 					class="redo items-btn"
 					:data-action="NameSpaceNodeOperate.undo"
 				>
@@ -45,21 +59,21 @@
 			</div>
 			<div class="nav-items insert-node">
 				<button
-					:disabled="props.operateDisable"
+					:disabled="props.buttonDisabled.insertDisabled"
 					class="insert-child items-btn"
 					:data-action="NameSpaceNodeOperate.insertNodeChild"
 				>
 					👶child
 				</button>
 				<button
-					:disabled="props.operateDisable"
+					:disabled="props.buttonDisabled.insertDisabled"
 					class="insert-father items-btn"
 					:data-action="NameSpaceNodeOperate.insertNodeParent"
 				>
 					👨father
 				</button>
 				<button
-					:disabled="props.operateDisable"
+					:disabled="props.buttonDisabled.insertDisabled"
 					class="insert-sibling items-btn"
 					:data-action="NameSpaceNodeOperate.insertNodeSibling"
 				>
@@ -69,14 +83,14 @@
 			<div class="nav-items node-operate">
 				<div class="node-operate-items">
 					<button
-						:disabled="props.operateDisable"
+						:disabled="props.buttonDisabled.upAndDownDisabled"
 						class="items-btn"
 						:data-action="NameSpaceNodeOperate.moveUp"
 					>
 						👆up
 					</button>
 					<button
-						:disabled="props.operateDisable"
+						:disabled="props.buttonDisabled.upAndDownDisabled"
 						class="items-btn"
 						:data-action="NameSpaceNodeOperate.moveDown"
 					>
@@ -85,14 +99,14 @@
 				</div>
 				<div class="node-operate-items">
 					<button
-						:disabled="props.operateDisable"
+						:disabled="props.buttonDisabled.editTextAndDeleteDisabled"
 						class="items-btn"
 						:data-action="NameSpaceNodeOperate.editText"
 					>
 						✍text
 					</button>
 					<button
-						:disabled="props.operateDisable"
+						:disabled="props.buttonDisabled.editTextAndDeleteDisabled"
 						class="items-btn"
 						:data-action="NameSpaceNodeOperate.deleteNode"
 					>
@@ -104,7 +118,7 @@
 						:class="`items-btn ${key}`"
 						v-for="[key, val] of (enumValues as Array<[string,string]>)"
 						:key="key"
-						:disabled="props.operateDisable"
+						:disabled="props.buttonDisabled.setPriorityDisabled"
 						:data-action="NameSpaceNodeOperate.setPriority"
 						:data-val="val"
 					>
@@ -126,21 +140,18 @@ import {
 	NameSpaceOtherOperation,
 	interfaceEmitsAction,
 } from "../../hooks/operate";
-import { ref } from "vue";
-import { typeModalType, typeSHowModalAction } from "./topbar";
+import { ref, onMounted } from "vue";
+import { typeModalType, typeShowModalAction,interfacebuttonsDisabled } from "./topbar";
+import Tooltip from "../selfUIs/Tooltips/Tooltip.vue";
 
 const enumValues = ref(Object.entries(PriorytyLevel));
 const model = defineModel();
-const props = defineProps({
-	redoDisable: {
-		type: Boolean,
-		default: false,
-	},
-	operateDisable: {
-		type: Boolean,
-		default: false,
-	},
-});
+const props = defineProps<{
+	fileName: string,
+	buttonDisabled?:interfacebuttonsDisabled
+}>();
+const nameArea = ref(null);
+onMounted(() => {});
 const Emits = defineEmits([
 	NameSpaceFileOperation.changeMindName,
 	NameSpaceFileOperation.openFile,
@@ -149,6 +160,7 @@ const Emits = defineEmits([
 	NameSpaceOtherOperation.showModal,
 	NameSpaceNodeOperate.NodeAction,
 ]);
+const showTip = ref(false);
 // const mindName = reactive({name:topbar_props.name})
 const buttonsProps: buttonProps[] = [
 	{
@@ -173,16 +185,24 @@ const buttonsProps: buttonProps[] = [
 		classList: ["file-operate-btn"],
 		innerText: "shortcut🔪",
 		type: buttonType.showModal,
-		eventClickHandle: ()=>showModalClick('shortcut'),
+		eventClickHandle: () => showModalClick("shortcut"),
 	},
 	{
 		classList: ["file-operate-btn"],
 		innerText: "tools🔨",
 		type: buttonType.showModal,
-		eventClickHandle: ()=>showModalClick('tools'),
+		eventClickHandle: () => showModalClick("tools"),
 	},
 ];
 
+function nameMouseOverHandle() {
+	if (nameArea.value) {
+		(nameArea.value as HTMLElement).style.setProperty(
+			"--content",
+			props.fileName
+		);
+	}
+}
 function NodeAction(e: Event) {
 	if (
 		e.target instanceof Element &&
@@ -213,15 +233,16 @@ function selectFileClick(): void {
 function saveFileClick(): void {
 	Emits(NameSpaceFileOperation.saveFile);
 }
-function showModalClick(type:typeModalType): void { // emits modal show
-	let actions:typeSHowModalAction = {
-		action:NameSpaceOtherOperation.showModal,
-		val:{
-			type:type,
-			show:true
-		}
-	} 
-	Emits(NameSpaceOtherOperation.showModal,actions);
+function showModalClick(type: typeModalType): void {
+	// emits modal show
+	let actions: typeShowModalAction = {
+		action: NameSpaceOtherOperation.showModal,
+		val: {
+			type: type,
+			show: true,
+		},
+	};
+	Emits(NameSpaceOtherOperation.showModal, actions);
 }
 </script>
 
@@ -246,6 +267,8 @@ $nodeOpWidth: calc(100% - $undoWidth - $insertWidth);
 		.name-area {
 			width: 40%;
 			display: inline-flex;
+			position: relative;
+
 			.label {
 				max-height: 100%;
 				overflow: hidden;
@@ -313,9 +336,15 @@ $nodeOpWidth: calc(100% - $undoWidth - $insertWidth);
 				justify-content: center;
 				border: none;
 				background-color: var(--color-topBar);
+				&:disabled{
+					color:rgb(223, 222, 222)
+				}
+				&:enabled{
+					color: var(--color-font-focus);
+				}
 				&:hover {
 					//background-color: var(--color-border-insection);
-					text-shadow: 1px 1px 2px var(--color-font-focus);
+					text-shadow: 1px 1px 2px grey;//var(--color-font-focus);
 					background-color: aliceblue;
 				}
 				&[disabled] {
@@ -323,6 +352,7 @@ $nodeOpWidth: calc(100% - $undoWidth - $insertWidth);
 					&:hover {
 						background-color: var(--color-topBar);
 						text-shadow: none;
+						
 					}
 				}
 			}

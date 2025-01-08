@@ -8,7 +8,7 @@ export enum PriorytyLevel {
 	medium = "2",
 	lower = "3",
 	lowest = "4",
-	none = "-1",
+	none = "none",
 }
 export type typeNodeId = string;
 
@@ -27,6 +27,9 @@ export type MindNode = {
 
 export const KeyPropertyText = "text";
 export const KeyPropertyPriority = "priority";
+export function createId():typeNodeId{
+	return `mindnode${new Date().getTime()}`
+}
 //tree struct function
 // generate tree node id function
 export function generateNodeId(): typeNodeId {
@@ -97,28 +100,49 @@ export function getFatherNode(
 //插入子节点
 export function insertChildNode(
 	tree: MindNode,
-	child: MindNode,
-	fatherId: typeNodeId
+	fatherId: typeNodeId,
+	child?: MindNode,
 ) {
-	if (!tree || !tree.children) return;
-
-	for (let node of tree.children) {
-		if (node?.data?.id === fatherId) {
-			node.children.push(child);
-			return;
+	if (!tree) return;
+	if(!child){
+		child = {
+			data:{
+				id:createId(),
+				createdTime:new Date().getTime(),
+				text:'new son'
+			},
+			children:[]
 		}
-		insertChildNode(node, child, fatherId);
+	}
+	let t = tree;
+	if(fatherId === t.data.id){
+		t.children.push(child);
+		return tree;
+	}else{
+		for(let n of t.children){
+			insertChildNode(n, fatherId,child);
+		}
 	}
 }
 
 //插入父节点
 export function insertFatherNode(
-	tree: MindNode,
-	fatherNode: MindNode,
-	childId: typeNodeId
+	tree: MindNode,childId: typeNodeId,
+	fatherNode?: MindNode,
+	
 ) {
 	if (!tree || !tree.children) {
 		return;
+	}
+	if(!fatherNode){
+		fatherNode = {
+			data:{
+				id:createId(),
+				createdTime:new Date().getTime(),
+				text:'new father'
+			},
+			children:[]
+		}
 	}
 	for (let i = 0; i < tree.children.length; i++) {
 		if (tree.children[i]?.data?.id === childId) {
@@ -126,23 +150,33 @@ export function insertFatherNode(
 			tree.children[i] = fatherNode;
 			return;
 		}
-		insertFatherNode(tree.children[i], fatherNode, childId);
+		insertFatherNode(tree.children[i],  childId, fatherNode);
 	}
 }
 
 //插入同级
 export function insertSiblingNode(
 	tree: MindNode,
-	siblingNode: MindNode,
-	targetId: typeNodeId
+	targetId: typeNodeId,
+	siblingNode?: MindNode,
 ) {
 	if (!tree || !tree.children) return;
+	if(!siblingNode){
+		siblingNode = {
+			data:{
+				id:createId(),
+				createdTime:new Date().getTime(),
+				text:'new sibling'
+			},
+			children:[]
+		}
+	}
 	for (let node of tree.children) {
 		if (node?.data.id === targetId) {
-			node.children.push(siblingNode);
+			getFatherNodeByChildId(tree,node?.data.id).children.push(siblingNode);
 			return;
 		}
-		insertSiblingNode(node, siblingNode, targetId);
+		insertSiblingNode(node, targetId, siblingNode);
 	}
 }
 

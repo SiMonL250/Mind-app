@@ -45,7 +45,13 @@
 					:key="ind"
 					@click="(e:PointerEvent)=>{
 						let _emitAction:typeItemClickAction = {
-							action:item.event
+							action:subOfItem.event ?? 'none',
+							val:
+							{
+								nodeId:treeNodeId,
+								someString:subOfItem.text,
+								
+							}
 						}
 						subOfItem.clickEvent(e,()=>itemClickCallbackFunc(_emitAction))
 					}"
@@ -108,7 +114,7 @@ const itemClickCallbackFunc: typeItemClickCallback = (
 	_emitAction: typeItemClickAction
 ) => {
 	//callback 要把操作emit到App.vue
-	//  console.log("param :>> ", _emitAction);
+	//   console.log("param :>> ", _emitAction);
 	contextMenuEmits(itemClickActionStr, _emitAction);
 };
 

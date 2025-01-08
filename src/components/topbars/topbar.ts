@@ -6,4 +6,13 @@ interface typeShowModelActionVal {
 	show: boolean;
 }
 
-export type typeSHowModalAction = interfaceEmitsAction<typeShowModelActionVal>;
+export type typeShowModalAction = interfaceEmitsAction<typeShowModelActionVal>;
+
+export interface interfacebuttonsDisabled{
+	undoRedoDisabled?:boolean;
+	insertDisabled?:boolean;
+	upAndDownDisabled?:boolean;
+	editTextAndDeleteDisabled?:boolean;
+	setPriorityDisabled?:boolean;
+	
+}

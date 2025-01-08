@@ -109,7 +109,7 @@ function calcHeight() {
 function calcPosition(newPos: interfacePosition, _height?: number) {
 	let windowWidth: number = document.documentElement.clientWidth;
 	// let windowHeight: number = document.documentElement.clientHeight;
-	//TODO 传菜单的position进来
+	// 传菜单的position进来
 	let showLeft =
 		inputWidth.value + newPos.clientX >= windowWidth - 10
 			? newPos.clientX - inputWidth.value

@@ -16,7 +16,13 @@ export enum toolTypes{
     HexBinDecOct='HexBinDecOct',
     //TODO 想要什么就加什么吧
 }
-
+export const sidebarItemList: sidebarProps[] = [
+	{
+		toolType: toolTypes.HexBinDecOct,
+		innerText: `${toolTypes.HexBinDecOct}`,
+	},
+	{ toolType: toolTypes.CrcCheck, innerText: "Crc Check" },
+];
 export interface elementProps{
     classList?:string[],
     id?:string,
